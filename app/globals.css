@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tipografía base */
+@layer base {
+  html {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900;
+    min-height: 100vh;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+/* Componentes personalizados */
+@layer components {
+  /* Contenedor principal */
+  .container-page {
+    @apply max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+  }
+
+  /* Título de sección */
+  .section-title {
+    @apply text-2xl font-semibold text-gray-900 mb-6;
+  }
+
+  /* Estilos para el contenido Markdown */
+  .prose-instante {
+    @apply text-gray-700 leading-relaxed;
+  }
+
+  .prose-instante h1 {
+    @apply text-2xl font-bold text-gray-900 mt-8 mb-4;
+  }
+
+  .prose-instante h2 {
+    @apply text-xl font-semibold text-gray-900 mt-6 mb-3;
+  }
+
+  .prose-instante h3 {
+    @apply text-lg font-medium text-gray-900 mt-4 mb-2;
+  }
+
+  .prose-instante p {
+    @apply mb-4;
+  }
+
+  .prose-instante ul, .prose-instante ol {
+    @apply mb-4 pl-6;
+  }
+
+  .prose-instante ul {
+    @apply list-disc;
+  }
+
+  .prose-instante ol {
+    @apply list-decimal;
+  }
+
+  .prose-instante li {
+    @apply mb-2;
+  }
+
+  .prose-instante strong {
+    @apply font-semibold text-gray-900;
+  }
+
+  .prose-instante em {
+    @apply italic;
+  }
+
+  .prose-instante blockquote {
+    @apply border-l-4 border-gray-200 pl-4 italic text-gray-600 my-4;
+  }
+
+  .prose-instante code {
+    @apply bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+
+  .prose-instante pre {
+    @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4;
+  }
+
+  .prose-instante pre code {
+    @apply bg-transparent text-inherit p-0;
+  }
+
+  .prose-instante a {
+    @apply text-blue-600 hover:text-blue-800 underline;
+  }
+
+  .prose-instante hr {
+    @apply border-gray-200 my-8;
+  }
+}
+
+/* Utilidades */
+@layer utilities {
+  /* Línea de truncado */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Animación suave de entrada */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
