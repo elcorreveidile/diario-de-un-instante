@@ -42,9 +42,12 @@ export interface EstadisticasCompletas {
 // ============================================================================
 
 export async function calcularEstadisticasCompletas(
-  instantes: Instante[]
+  instantes: Instante[],
+  incluirPrivados: boolean = false
 ): Promise<EstadisticasCompletas> {
-  const instantesVisibles = filtrarInstantesVisibles(instantes);
+  const instantesVisibles = incluirPrivados
+    ? filtrarSoloPublicados(instantes)
+    : filtrarInstantesVisibles(instantes);
 
   return {
     rachaActual: calcularRachaActual(instantesVisibles),
@@ -65,6 +68,14 @@ function filtrarInstantesVisibles(instantes: Instante[]): Instante[] {
     const esPublico = i.privado === false || !i.hasOwnProperty('privado');
     const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
     return esPublico && esVisible;
+  });
+}
+
+// Filtrar solo por estado (para admin incluye privados)
+function filtrarSoloPublicados(instantes: Instante[]): Instante[] {
+  return instantes.filter(i => {
+    const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+    return esVisible;
   });
 }
 

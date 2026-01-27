@@ -196,10 +196,10 @@ export default function InstantePage() {
       {/* Botón flotante para modo zen */}
       <button
         onClick={() => setZenMode(!zenMode)}
-        className={`fixed bottom-6 right-6 z-50 px-4 py-2 rounded-lg shadow-lg transition-all ${
+        className={`fixed bottom-20 right-6 z-50 px-4 py-2 rounded-lg shadow-lg transition-all ${
           zenMode
             ? 'bg-gray-800 hover:bg-gray-700 text-white'
-            : 'bg-violet-600 hover:bg-violet-700 text-white'
+            : 'bg-gray-700 hover:bg-gray-600 text-white'
         }`}
         title={zenMode ? 'Salir del modo zen (Esc)' : 'Modo zen (⌘⇧Z)'}
       >
@@ -241,6 +241,11 @@ export default function InstantePage() {
           z-index: 40;
           overflow-y: auto;
           padding: 2rem;
+          background: white;
+        }
+
+        .dark .zen-mode {
+          background: #111827;
         }
 
         .zen-content {
@@ -248,6 +253,7 @@ export default function InstantePage() {
           line-height: 1.8;
           max-width: 800px;
           margin: 0 auto;
+          padding-top: 2rem;
         }
 
         .zen-content h1,

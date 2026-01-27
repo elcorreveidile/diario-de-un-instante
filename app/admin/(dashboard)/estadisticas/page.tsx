@@ -33,7 +33,7 @@ export default function EstadisticasPage() {
     const loadEstadisticas = async () => {
       try {
         const instantes = await getAllInstantes();
-        const stats = await calcularEstadisticasCompletas(instantes);
+        const stats = await calcularEstadisticasCompletas(instantes, true); // true = incluir privados en admin
         setEstadisticas(stats);
       } catch (error) {
         console.error('Error cargando estadísticas:', error);
