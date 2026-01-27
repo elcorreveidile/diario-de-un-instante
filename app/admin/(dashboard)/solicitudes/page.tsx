@@ -236,7 +236,7 @@ export default function SolicitudesPage() {
                     <p className="text-gray-700 dark:text-gray-300 text-sm bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                       <span className="font-medium">¿Por qué le interesa?</span>
                       <br />
-                      "{request.reason}"
+                      &ldquo;{request.reason}&rdquo;
                     </p>
                   )}
                 </div>
