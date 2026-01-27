@@ -1,15 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getAllInstantes, Instante } from '@/lib/firestore';
+import { getAllInstantes, Instante, AREAS, AreaId } from '@/lib/firestore';
 import InstanteCard from '@/components/InstanteCard';
 
 export default function ArchivoPage() {
   const [instantes, setInstantes] = useState<Instante[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filtros
+  const [filtroArea, setFiltroArea] = useState<AreaId | 'todos'>('todos');
+  const [filtroTipo, setFiltroTipo] = useState<'todos' | 'pensamiento' | 'accion'>('todos');
+  const [fechaInicio, setFechaInicio] = useState('');
+  const [fechaFin, setFechaFin] = useState('');
 
   useEffect(() => {
     const loadInstantes = async () => {
@@ -32,15 +38,54 @@ export default function ArchivoPage() {
     loadInstantes();
   }, []);
 
+  // Aplicar filtros
+  const instantesFiltrados = useMemo(() => {
+    return instantes.filter(instante => {
+      // Filtro por área
+      if (filtroArea !== 'todos' && instante.area !== filtroArea) {
+        return false;
+      }
+
+      // Filtro por tipo
+      if (filtroTipo !== 'todos' && instante.tipo !== filtroTipo) {
+        return false;
+      }
+
+      // Filtro por rango de fechas
+      if (fechaInicio && new Date(instante.fecha) < new Date(fechaInicio)) {
+        return false;
+      }
+      if (fechaFin && new Date(instante.fecha) > new Date(fechaFin)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [instantes, filtroArea, filtroTipo, fechaInicio, fechaFin]);
+
+  // Limpiar filtros
+  const limpiarFiltros = () => {
+    setFiltroArea('todos');
+    setFiltroTipo('todos');
+    setFechaInicio('');
+    setFechaFin('');
+  };
+
   // Agrupar por mes para mejor organización
-  const instantesPorMes = instantes.reduce((acc, instante) => {
+  const instantesPorMes = instantesFiltrados.reduce((acc, instante) => {
     const mes = format(new Date(instante.fecha), 'MMMM yyyy', { locale: es });
     if (!acc[mes]) {
       acc[mes] = [];
     }
     acc[mes].push(instante);
     return acc;
-  }, {} as Record<string, typeof instantes>);
+  }, {} as Record<string, typeof instantesFiltrados>);
+
+  const hayFiltrosActivos =
+    filtroArea !== 'todos' ||
+    filtroTipo !== 'todos' ||
+    fechaInicio ||
+    fechaFin;
 
   if (loading) {
     return (
@@ -74,14 +119,95 @@ export default function ArchivoPage() {
           Archivo
         </h1>
         <p className="text-gray-500 dark:text-gray-400">
-          Todos los instantes ordenados cronológicamente.
-          {instantes.length > 0 && (
-            <span className="ml-2 text-sm text-gray-400 dark:text-gray-500">
-              ({instantes.length} {instantes.length === 1 ? 'instante' : 'instantes'} en total)
-            </span>
-          )}
+          {hayFiltrosActivos
+            ? `Mostrando ${instantesFiltrados.length} de ${instantes.length} instantes`
+            : `Todos los instantes ordenados cronológicamente. (${instantes.length} total)`}
         </p>
       </header>
+
+      {/* Filtros */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Filtros
+          </h2>
+          {hayFiltrosActivos && (
+            <button
+              onClick={limpiarFiltros}
+              className="text-sm text-violet-600 hover:text-violet-700 dark:text-violet-400"
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Filtro por área */}
+          <div>
+            <label htmlFor="area" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Área
+            </label>
+            <select
+              id="area"
+              value={filtroArea}
+              onChange={(e) => setFiltroArea(e.target.value as AreaId | 'todos')}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            >
+              <option value="todos">Todas las áreas</option>
+              {AREAS.map(area => (
+                <option key={area.id} value={area.id}>
+                  {area.emoji} {area.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtro por tipo */}
+          <div>
+            <label htmlFor="tipo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Tipo
+            </label>
+            <select
+              id="tipo"
+              value={filtroTipo}
+              onChange={(e) => setFiltroTipo(e.target.value as 'todos' | 'pensamiento' | 'accion')}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            >
+              <option value="todos">Todos</option>
+              <option value="pensamiento">💭 Pensamiento</option>
+              <option value="accion">⚡ Acción</option>
+            </select>
+          </div>
+
+          {/* Filtro por fecha inicio */}
+          <div>
+            <label htmlFor="fechaInicio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Desde
+            </label>
+            <input
+              id="fechaInicio"
+              type="date"
+              value={fechaInicio}
+              onChange={(e) => setFechaInicio(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          {/* Filtro por fecha fin */}
+          <div>
+            <label htmlFor="fechaFin" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Hasta
+            </label>
+            <input
+              id="fechaFin"
+              type="date"
+              value={fechaFin}
+              onChange={(e) => setFechaFin(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Timeline por meses */}
       {Object.keys(instantesPorMes).length > 0 ? (
@@ -105,7 +231,7 @@ export default function ArchivoPage() {
                   <InstanteCard
                     key={instante.id || `${instante.area}-${instante.slug}`}
                     instante={instante}
-                    showArea={true}
+                    showArea={filtroArea === 'todos'}
                   />
                 ))}
               </div>
@@ -115,7 +241,9 @@ export default function ArchivoPage() {
       ) : (
         <section className="text-center py-16">
           <p className="text-gray-400 dark:text-gray-500 mb-4">
-            Aún no hay instantes registrados.
+            {hayFiltrosActivos
+              ? 'No se encontraron instantes con los filtros aplicados.'
+              : 'Aún no hay instantes registrados.'}
           </p>
           <Link
             href="/admin/nuevo"
