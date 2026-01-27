@@ -17,7 +17,7 @@ export default function ArchivoPage() {
         const allInstantes = await getAllInstantes();
         // Filtrar: solo (públicos O sin campo privado) Y (publicados O sin campo estado)
         const instantesFiltrados = allInstantes.filter(i => {
-          const esPublico = !i.privado || i.privado === false;
+          const esPublico = i.privado === false || !i.hasOwnProperty('privado');
           const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
           return esPublico && esVisible;
         });

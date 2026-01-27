@@ -314,7 +314,7 @@ export async function getAreasConUltimoInstante(): Promise<AreaConUltimoInstante
   return AREAS.map(area => {
     // Filtrar instantes: solo los que son públicos Y (publicados O no tienen campo estado)
     const instantesDeArea = allInstantes.filter(i => {
-      const esPublico = !i.privado || i.privado === false;
+      const esPublico = i.privado === false || !i.hasOwnProperty('privado');
       const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
       return i.area === area.id && esPublico && esVisible;
     });
@@ -342,7 +342,7 @@ export async function getEstadisticas() {
 
   // Filtrar solo los que son públicos Y (publicados O no tienen campo estado)
   const instantesVisibles = allInstantes.filter(i => {
-    const esPublico = !i.privado || i.privado === false;
+    const esPublico = i.privado === false || !i.hasOwnProperty('privado');
     const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
     return esPublico && esVisible;
   });

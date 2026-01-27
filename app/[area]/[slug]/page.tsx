@@ -30,7 +30,7 @@ export default function InstantePage() {
         const instante = allInstantes.find(i => {
           const matchArea = i.area === areaId;
           const matchSlug = i.slug === slug;
-          const esPublico = !i.privado || i.privado === false;
+          const esPublico = i.privado === false || !i.hasOwnProperty('privado');
           const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
           return matchArea && matchSlug && esPublico && esVisible;
         });

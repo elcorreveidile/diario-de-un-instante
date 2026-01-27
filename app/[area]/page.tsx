@@ -23,7 +23,7 @@ export default function AreaPage() {
         // Filtrar: solo del área Y (públicos O sin campo privado) Y (publicados O sin campo estado)
         const instantesFiltrados = allInstantes.filter(i => {
           const esAreaCorrecta = i.area === areaId;
-          const esPublico = !i.privado || i.privado === false;
+          const esPublico = i.privado === false || !i.hasOwnProperty('privado');
           const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
           return esAreaCorrecta && esPublico && esVisible;
         });
