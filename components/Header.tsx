@@ -1,7 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import ThemeToggle from './ThemeToggle';
+import { useAuth } from '@/lib/auth';
 
 export default function Header() {
+  const { user, userProfile } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
       <nav className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,6 +42,17 @@ export default function Header() {
               </svg>
               <span className="hidden sm:inline">Buscar</span>
             </Link>
+
+            {/* Enlace al perfil del usuario autenticado */}
+            {user && userProfile && (
+              <Link
+                href={`/@${userProfile.displayName?.toLowerCase() || user.email?.split('@')[0]}`}
+                className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors font-medium"
+              >
+                Mi Blog
+              </Link>
+            )}
+
             <ThemeToggle />
           </div>
         </div>
