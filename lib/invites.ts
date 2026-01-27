@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, query, where, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, orderBy, Timestamp, updateDoc, doc } from 'firebase/firestore';
 import { db } from './firebase';
 
 export interface InviteCode {
@@ -95,4 +95,98 @@ export async function verifyInviteCode(code: string): Promise<boolean> {
   const snapshot = await getDocs(q);
 
   return !snapshot.empty;
+}
+
+// ==================== SOLICITUDES DE INVITACIÓN ====================
+
+export interface InvitationRequest {
+  id?: string;
+  name: string;
+  email: string;
+  reason?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: Timestamp;
+  reviewedAt?: Timestamp;
+  reviewedBy?: string;
+  inviteCodeSent?: boolean;
+}
+
+// Crear una nueva solicitud de invitación
+export async function createInvitationRequest(
+  name: string,
+  email: string,
+  reason?: string
+): Promise<InvitationRequest> {
+  const docRef = await addDoc(collection(db, 'invitation_requests'), {
+    name,
+    email,
+    reason: reason || '',
+    status: 'pending',
+    createdAt: Timestamp.now(),
+    reviewedAt: null,
+    reviewedBy: null,
+    inviteCodeSent: false,
+  });
+
+  return {
+    id: docRef.id,
+    name,
+    email,
+    reason,
+    status: 'pending',
+    createdAt: Timestamp.now(),
+  };
+}
+
+// Obtener todas las solicitudes de invitación
+export async function getAllInvitationRequests(): Promise<InvitationRequest[]> {
+  const q = query(
+    collection(db, 'invitation_requests'),
+    orderBy('createdAt', 'desc')
+  );
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as InvitationRequest[];
+}
+
+// Obtener solicitudes pendientes
+export async function getPendingInvitationRequests(): Promise<InvitationRequest[]> {
+  const q = query(
+    collection(db, 'invitation_requests'),
+    where('status', '==', 'pending'),
+    orderBy('createdAt', 'desc')
+  );
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as InvitationRequest[];
+}
+
+// Actualizar estado de una solicitud
+export async function updateInvitationRequestStatus(
+  requestId: string,
+  status: 'approved' | 'rejected',
+  reviewedBy: string
+): Promise<void> {
+  const updates: any = {
+    status,
+    reviewedAt: Timestamp.now(),
+    reviewedBy,
+  };
+
+  await updateDoc(doc(db, 'invitation_requests', requestId), updates);
+}
+
+// Marcar que se envió el código de invitación
+export async function markInviteCodeSent(requestId: string): Promise<void> {
+  await updateDoc(doc(db, 'invitation_requests', requestId), {
+    inviteCodeSent: true,
+  });
 }

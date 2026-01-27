@@ -67,12 +67,20 @@ export default function AdminLayout({
                   Estadísticas
                 </Link>
                 {isAdmin && (
-                  <Link
-                    href="/admin/invitaciones"
-                    className="text-gray-600 hover:text-gray-900 text-sm"
-                  >
-                    Invitaciones
-                  </Link>
+                  <>
+                    <Link
+                      href="/admin/invitaciones"
+                      className="text-gray-600 hover:text-gray-900 text-sm"
+                    >
+                      Invitaciones
+                    </Link>
+                    <Link
+                      href="/admin/solicitudes"
+                      className="text-gray-600 hover:text-gray-900 text-sm"
+                    >
+                      Solicitudes
+                    </Link>
+                  </>
                 )}
                 <Link
                   href="/admin/configuracion"
@@ -158,13 +166,22 @@ export default function AdminLayout({
                 Estadísticas
               </Link>
               {isAdmin && (
-                <Link
-                  href="/admin/invitaciones"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
-                >
-                  Invitaciones
-                </Link>
+                <>
+                  <Link
+                    href="/admin/invitaciones"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
+                  >
+                    Invitaciones
+                  </Link>
+                  <Link
+                    href="/admin/solicitudes"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
+                  >
+                    Solicitudes
+                  </Link>
+                </>
               )}
               <Link
                 href="/admin/configuracion"
