@@ -270,7 +270,7 @@ export default function SolicitudesPage() {
                       )}
                     </button>
                     <button
-                      onClick={() => handleReject(request.id)}
+                      onClick={() => handleReject(request.id!)}
                       disabled={processing === request.id}
                       className="bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400 text-white px-3 py-1.5 rounded-lg text-sm disabled:cursor-not-allowed"
                     >
