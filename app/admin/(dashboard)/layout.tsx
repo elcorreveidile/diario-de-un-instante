@@ -58,6 +58,12 @@ export default function AdminLayout({
                   Nuevo
                 </Link>
                 <Link
+                  href="/admin/estadisticas"
+                  className="text-gray-600 hover:text-gray-900 text-sm"
+                >
+                  Estadísticas
+                </Link>
+                <Link
                   href="/"
                   className="text-gray-600 hover:text-gray-900 text-sm"
                   target="_blank"
