@@ -240,16 +240,6 @@ export default function UsuariosPage() {
           </div>
         )}
       </div>
-
-      {/* Instrucciones para eliminar desde Firebase Auth */}
-      <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-amber-900 mb-2">⚠️ Eliminar usuarios</h3>
-        <p className="text-sm text-amber-800">
-          El botón de eliminar solo borra el perfil de Firestore. Para eliminar completamente la cuenta,
-          también debes hacerlo desde <a href="https://console.firebase.google.com/project/diario-de-un-instante/authentication/users"
-          target="_blank" rel="noopener noreferrer" className="underline font-medium">Firebase Console</a>.
-        </p>
-      </div>
     </div>
   );
 }
