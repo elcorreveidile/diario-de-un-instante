@@ -3,14 +3,15 @@ interface StatsProps {
   pensamientos: number;
   acciones: number;
   areasActivas: number;
+  totalAreas?: number;
 }
 
-export default function Stats({ totalInstantes, pensamientos, acciones, areasActivas }: StatsProps) {
+export default function Stats({ totalInstantes, pensamientos, acciones, areasActivas, totalAreas = 11 }: StatsProps) {
   const stats = [
     { label: 'Total instantes', value: totalInstantes, color: 'text-gray-900' },
     { label: 'Pensamientos', value: pensamientos, color: 'text-violet-600' },
     { label: 'Acciones', value: acciones, color: 'text-emerald-600' },
-    { label: 'Áreas activas', value: `${areasActivas}/10`, color: 'text-amber-600' },
+    { label: 'Áreas activas', value: `${areasActivas}/${totalAreas}`, color: 'text-amber-600' },
   ];
 
   return (

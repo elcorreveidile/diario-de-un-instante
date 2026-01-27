@@ -13,6 +13,7 @@ export default function HomePage() {
     pensamientos: 0,
     acciones: 0,
     areasActivas: 0,
+    totalAreas: 11,
   });
   const [loading, setLoading] = useState(true);
 
@@ -75,6 +76,7 @@ export default function HomePage() {
           pensamientos={stats.pensamientos}
           acciones={stats.acciones}
           areasActivas={stats.areasActivas}
+          totalAreas={stats.totalAreas}
         />
       </section>
 
