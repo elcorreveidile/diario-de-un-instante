@@ -80,6 +80,12 @@ export default function AdminLayout({
                     >
                       Solicitudes
                     </Link>
+                    <Link
+                      href="/admin/usuarios"
+                      className="text-gray-600 hover:text-gray-900 text-sm"
+                    >
+                      Usuarios
+                    </Link>
                   </>
                 )}
                 <Link
@@ -180,6 +186,13 @@ export default function AdminLayout({
                     className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
                   >
                     Solicitudes
+                  </Link>
+                  <Link
+                    href="/admin/usuarios"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
+                  >
+                    Usuarios
                   </Link>
                 </>
               )}

@@ -531,4 +531,62 @@ export async function getEstadisticasByUser(userId: string) {
   };
 }
 
+// ==================== GESTIÓN DE USUARIOS ====================
+
+export interface Usuario {
+  uid: string;
+  email: string;
+  displayName?: string;
+  role: 'admin' | 'user';
+  createdAt: Date;
+  emailVerified?: boolean;
+}
+
+// Obtener todos los usuarios
+export async function getAllUsuarios(): Promise<Usuario[]> {
+  const usersRef = collection(db, 'users');
+  const snapshot = await getDocs(usersRef);
+
+  return snapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      uid: doc.id,
+      email: data.email || '',
+      displayName: data.displayName || '',
+      role: data.role || 'user',
+      createdAt: data.createdAt?.toDate() || new Date(),
+      emailVerified: data.emailVerified || false,
+    };
+  });
+}
+
+// Obtener un usuario por ID
+export async function getUsuarioById(uid: string): Promise<Usuario | null> {
+  const userDoc = await getDoc(doc(db, 'users', uid));
+
+  if (!userDoc.exists()) {
+    return null;
+  }
+
+  const data = userDoc.data();
+  return {
+    uid: userDoc.id,
+    email: data.email || '',
+    displayName: data.displayName || '',
+    role: data.role || 'user',
+    createdAt: data.createdAt?.toDate() || new Date(),
+    emailVerified: data.emailVerified || false,
+  };
+}
+
+// Actualizar rol de usuario
+export async function updateUsuarioRole(uid: string, role: 'admin' | 'user'): Promise<void> {
+  await updateDoc(doc(db, 'users', uid), { role });
+}
+
+// Eliminar un usuario (solo Firestore, no Firebase Auth)
+export async function deleteUsuario(uid: string): Promise<void> {
+  await deleteDoc(doc(db, 'users', uid));
+}
+
 // ==================== FIN NUEVAS FUNCIONES v0.5 ====================
