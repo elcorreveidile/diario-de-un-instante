@@ -184,7 +184,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Si es un usuario nuevo, verificar código de invitación
     if (isNewUser) {
-      await verifyAndUseInviteCode(inviteCode!, email);
+      if (!inviteCode || inviteCode.trim() === '') {
+        // Hacer logout para no dejar el usuario autenticado sin código
+        await signOut(auth);
+        throw new Error('NEW_USER_NO_INVITE');
+      }
+      await verifyAndUseInviteCode(inviteCode, email);
     }
 
     // Crear o actualizar perfil
@@ -203,7 +208,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Si es un usuario nuevo, verificar código de invitación
     if (isNewUser) {
-      await verifyAndUseInviteCode(inviteCode!, email);
+      if (!inviteCode || inviteCode.trim() === '') {
+        // Hacer logout para no dejar el usuario autenticado sin código
+        await signOut(auth);
+        throw new Error('NEW_USER_NO_INVITE');
+      }
+      await verifyAndUseInviteCode(inviteCode, email);
     }
 
     // Crear o actualizar perfil

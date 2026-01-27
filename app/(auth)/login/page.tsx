@@ -57,7 +57,11 @@ export default function LoginPage() {
       await signInWithGoogle();
       router.push('/admin');
     } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión con Google');
+      if (err.message === 'NEW_USER_NO_INVITE') {
+        setError('Esta cuenta de Google no está registrada. Por favor regístrate con un código de invitación.');
+      } else {
+        setError(err.message || 'Error al iniciar sesión con Google');
+      }
     } finally {
       setOauthLoading(null);
     }
@@ -70,7 +74,11 @@ export default function LoginPage() {
       await signInWithApple();
       router.push('/admin');
     } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión con Apple');
+      if (err.message === 'NEW_USER_NO_INVITE') {
+        setError('Esta cuenta de Apple no está registrada. Por favor regístrate con un código de invitación.');
+      } else {
+        setError(err.message || 'Error al iniciar sesión con Apple');
+      }
     } finally {
       setOauthLoading(null);
     }
