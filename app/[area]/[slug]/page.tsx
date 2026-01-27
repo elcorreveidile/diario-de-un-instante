@@ -196,7 +196,7 @@ export default function InstantePage() {
       {/* Botón flotante para modo zen */}
       <button
         onClick={() => setZenMode(!zenMode)}
-        className={`fixed bottom-20 right-6 z-50 px-4 py-2 rounded-lg shadow-lg transition-all ${
+        className={`fixed bottom-6 left-6 z-50 px-4 py-2 rounded-lg shadow-lg transition-all ${
           zenMode
             ? 'bg-gray-800 hover:bg-gray-700 text-white'
             : 'bg-gray-700 hover:bg-gray-600 text-white'
@@ -223,7 +223,7 @@ export default function InstantePage() {
 
       {/* Atajo de teclado para salir */}
       {zenMode && (
-        <div className="fixed bottom-6 left-6 z-50 text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg">
+        <div className="fixed bottom-6 right-6 z-50 text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg">
           Presiona <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">Esc</kbd> o <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">⌘⇧Z</kbd> para salir
         </div>
       )}
