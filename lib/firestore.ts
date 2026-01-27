@@ -124,6 +124,16 @@ export interface AreaConUltimoInstante {
   totalInstantes: number;
 }
 
+// Configuración del blog del usuario (v0.5.2)
+export interface BlogConfig {
+  displayName: string; // Nombre para mostrar en "Diario de un Instante de..."
+  bio?: string; // Descripción del usuario
+  photoURL?: string; // URL de foto de perfil
+  headerPhotoURL?: string; // URL de foto de cabecera
+  primaryColor?: string; // Color principal (hex)
+  secondaryColor?: string; // Color secundario (hex)
+}
+
 const COLLECTION_NAME = 'instantes';
 
 // Generar slug desde título
@@ -589,4 +599,61 @@ export async function deleteUsuario(uid: string): Promise<void> {
   await deleteDoc(doc(db, 'users', uid));
 }
 
-// ==================== FIN NUEVAS FUNCIONES v0.5 ====================
+// ==================== CONFIGURACIÓN DE BLOG v0.5.2 ====================
+
+// Obtener configuración del blog de un usuario
+export async function getBlogConfig(userId: string): Promise<BlogConfig | null> {
+  const userDoc = await getDoc(doc(db, 'users', userId));
+
+  if (!userDoc.exists()) {
+    return null;
+  }
+
+  const data = userDoc.data();
+  return {
+    displayName: data.displayName || data.email?.split('@')[0] || 'Usuario',
+    bio: data.bio,
+    photoURL: data.photoURL,
+    headerPhotoURL: data.headerPhotoURL,
+    primaryColor: data.primaryColor,
+    secondaryColor: data.secondaryColor,
+  };
+}
+
+// Actualizar configuración del blog
+export async function updateBlogConfig(userId: string, config: Partial<BlogConfig>): Promise<void> {
+  const updateData: any = {};
+
+  if (config.displayName !== undefined) updateData.displayName = config.displayName;
+  if (config.bio !== undefined) updateData.bio = config.bio;
+  if (config.photoURL !== undefined) updateData.photoURL = config.photoURL;
+  if (config.headerPhotoURL !== undefined) updateData.headerPhotoURL = config.headerPhotoURL;
+  if (config.primaryColor !== undefined) updateData.primaryColor = config.primaryColor;
+  if (config.secondaryColor !== undefined) updateData.secondaryColor = config.secondaryColor;
+
+  await updateDoc(doc(db, 'users', userId), updateData);
+}
+
+// Obtener usuario por username (email o parte del email)
+export async function getUserByUsername(username: string): Promise<Usuario | null> {
+  const usersRef = collection(db, 'users');
+  const q = query(usersRef, where('displayName', '==', username));
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const userDoc = snapshot.docs[0];
+  const data = userDoc.data();
+  return {
+    uid: userDoc.id,
+    email: data.email || '',
+    displayName: data.displayName || '',
+    role: data.role || 'user',
+    createdAt: data.createdAt?.toDate() || new Date(),
+    emailVerified: data.emailVerified || false,
+  };
+}
+
+// ==================== FIN NUEVAS FUNCIONES v0.5.2 ====================

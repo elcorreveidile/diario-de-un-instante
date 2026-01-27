@@ -95,6 +95,12 @@ export default function AdminLayout({
                   Configuración
                 </Link>
                 <Link
+                  href="/admin/configuracion-blog"
+                  className="text-gray-600 hover:text-gray-900 text-sm"
+                >
+                  Mi Blog
+                </Link>
+                <Link
                   href="/"
                   className="text-gray-600 hover:text-gray-900 text-sm"
                   target="_blank"
@@ -202,6 +208,13 @@ export default function AdminLayout({
                 className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
               >
                 Configuración
+              </Link>
+              <Link
+                href="/admin/configuracion-blog"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
+              >
+                Mi Blog
               </Link>
               <Link
                 href="/"

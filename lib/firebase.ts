@@ -1,6 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider, OAuthProvider, EmailAuthProvider } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -30,5 +31,6 @@ appleProvider.addScope('name');
 // Exportar servicios
 export const db = getFirestore(app);
 export const auth = authInstance;
+export const storage = getStorage(app);
 export { googleProvider, appleProvider };
 export default app;
