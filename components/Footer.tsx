@@ -10,10 +10,14 @@ export default function Footer() {
             Un jardín digital para cultivar una vida más consciente.
           </p>
 
-          {/* Copyright */}
-          <p className="text-xs text-gray-300 dark:text-gray-600">
-            {currentYear} · Diario de un Instante
-          </p>
+          {/* Versión y créditos */}
+          <div className="flex flex-col sm:flex-row items-center gap-2 text-xs text-gray-300 dark:text-gray-600 text-center sm:text-right">
+            <span>v0.4</span>
+            <span>·</span>
+            <span>Desarrollado por <a href="https://twitter.com/jabelainez" target="_blank" rel="noopener noreferrer" className="hover:text-gray-500 dark:hover:text-gray-400 transition-colors">@jabelainez</a></span>
+            <span>·</span>
+            <span>© {currentYear} All rights reserved</span>
+          </div>
         </div>
       </div>
     </footer>
