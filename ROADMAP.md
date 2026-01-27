@@ -1,6 +1,6 @@
 # 🗺️ Roadmap - Diario de un Instante
 
-**Versión actual**: v0.5 - Multi-tenant con Invitaciones ✅
+**Versión actual**: v0.5.1 - Auth Extendida ✅
 **Última actualización**: Enero 2026
 
 ---
@@ -21,6 +21,17 @@
 - [x] Menú responsive
 
 **Ver detalles completos en**: `v0.5-CHANGELOG.md`
+
+### v0.5.1 - Autenticación Extendida ✅ COMPLETADA
+
+- [x] Google Auth (OAuth)
+- [x] Apple Auth (OAuth)
+- [x] Magic Links (Passwordless)
+- [x] Reset Password
+- [x] Email Verification
+- [x] Gestión de usuarios en panel admin
+
+**Ver detalles completos en**: `v0.5.1-CHANGELOG.md`
 
 ---
 
@@ -281,8 +292,8 @@
 
 | Versión | Prioridad | Estimado | Estado |
 |---------|-----------|----------|--------|
-| v0.5.1 - Auth Extendida | ALTA | 1-2 semanas | ⏳ Pendiente |
-| v0.5.2 - Personalización | ALTA | 2-3 semanas | ⏳ Pendiente |
+| v0.5.1 - Auth Extendida | ALTA | 1-2 semanas | ✅ Completada |
+| v0.5.2 - Personalización | ALTA | 2-3 semanas | ⏳ En desarrollo |
 | v0.6 - Social | MEDIA | 2-3 semanas | ⏳ Pendiente |
 | v0.7 - Contenido Avanzado | MEDIA | 3-4 semanas | ⏳ Pendiente |
 | v0.8 - Analytics | MEDIA | 2 semanas | ⏳ Pendiente |
