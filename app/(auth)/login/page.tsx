@@ -4,6 +4,8 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
+import { isSignInWithEmailLink } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,16 +20,20 @@ export default function LoginPage() {
 
   // Verificar si viene de un magic link
   useEffect(() => {
-    if (window.location.href.includes('?')) {
-      completeMagicLinkSignIn(email)
-        .then(() => {
-          router.push('/admin');
-        })
-        .catch((err) => {
-          setError(err.message || 'Error al iniciar sesión con magic link');
-        });
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      // Obtener email del localStorage
+      const savedEmail = window.localStorage.getItem('emailForSignIn');
+      if (savedEmail) {
+        completeMagicLinkSignIn(savedEmail)
+          .then(() => {
+            router.push('/admin');
+          })
+          .catch((err) => {
+            setError(err.message || 'Error al iniciar sesión con magic link');
+          });
+      }
     }
-  }, []);
+  }, [completeMagicLinkSignIn, router]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

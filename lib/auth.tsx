@@ -176,9 +176,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async (inviteCode?: string) => {
     const result = await signInWithPopup(auth, googleProvider);
     const email = result.user.email!;
+    const uid = result.user.uid;
+
+    // Verificar si el usuario ya existe en Firestore
+    const userDoc = await getDoc(doc(db, 'users', uid));
+    const isNewUser = !userDoc.exists();
 
     // Si es un usuario nuevo, verificar código de invitación
-    if (result._tokenResponse?.isNewUser) {
+    if (isNewUser) {
       await verifyAndUseInviteCode(inviteCode!, email);
     }
 
@@ -190,9 +195,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithApple = async (inviteCode?: string) => {
     const result = await signInWithPopup(auth, appleProvider);
     const email = result.user.email!;
+    const uid = result.user.uid;
+
+    // Verificar si el usuario ya existe en Firestore
+    const userDoc = await getDoc(doc(db, 'users', uid));
+    const isNewUser = !userDoc.exists();
 
     // Si es un usuario nuevo, verificar código de invitación
-    if (result._tokenResponse?.isNewUser) {
+    if (isNewUser) {
       await verifyAndUseInviteCode(inviteCode!, email);
     }
 
