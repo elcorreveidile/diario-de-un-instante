@@ -28,31 +28,20 @@ export default function AreaCard({ area }: AreaCardProps) {
           </span>
         </div>
 
-        {/* Último instante */}
-        {hasInstantes && area.ultimoInstante ? (
-          <div className="space-y-2">
-            <p className="text-sm text-gray-700 dark:text-gray-300 font-medium line-clamp-2">
-              {area.ultimoInstante.titulo}
-            </p>
-            <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+        {/* Definición del área */}
+        <div className="space-y-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 leading-relaxed">
+            {area.definicion}
+          </p>
+          {hasInstantes && area.ultimoInstante ? (
+            <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 pt-1">
+              <span className="text-gray-500 dark:text-gray-400">Último:</span>
               <time dateTime={area.ultimoInstante.fecha}>
                 {format(new Date(area.ultimoInstante.fecha), "d 'de' MMMM", { locale: es })}
               </time>
-              <span>·</span>
-              <span className={`capitalize ${
-                area.ultimoInstante.tipo === 'accion'
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-violet-600 dark:text-violet-400'
-              }`}>
-                {area.ultimoInstante.tipo}
-              </span>
             </div>
-          </div>
-        ) : (
-          <p className="text-sm text-gray-400 dark:text-gray-500 italic">
-            Aún no hay instantes registrados
-          </p>
-        )}
+          ) : null}
+        </div>
 
         {/* Flecha indicadora */}
         <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
