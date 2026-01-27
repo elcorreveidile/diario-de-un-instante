@@ -3,38 +3,42 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  getAllInstantes,
+  getInstantesByUser,
   getInstantesByEstado,
   deleteInstante,
   AREAS,
   Instante
 } from '@/lib/firestore';
+import { useAuth } from '@/lib/auth';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function AdminPage() {
+  const { user } = useAuth();
   const [instantes, setInstantes] = useState<Instante[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<'todos' | 'borradores' | 'publicados' | 'privados'>('todos');
 
   const loadInstantes = async () => {
+    if (!user?.uid) return;
+
     try {
       let data: Instante[];
+      const userInstantes = await getInstantesByUser(user.uid);
 
       switch (filtro) {
         case 'borradores':
-          data = await getInstantesByEstado('borrador');
+          data = userInstantes.filter(i => i.estado === 'borrador' || !i.hasOwnProperty('estado'));
           break;
         case 'publicados':
-          data = await getInstantesByEstado('publicado');
+          data = userInstantes.filter(i => i.estado === 'publicado');
           break;
         case 'privados':
-          const allInstantes = await getAllInstantes();
-          data = allInstantes.filter(i => i.privado);
+          data = userInstantes.filter(i => i.privado);
           break;
         default:
-          data = await getAllInstantes();
+          data = userInstantes;
       }
 
       setInstantes(data);
@@ -47,7 +51,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     loadInstantes();
-  }, [filtro]);
+  }, [filtro, user]);
 
   const handleDelete = async (id: string, titulo: string) => {
     if (!confirm(`¿Eliminar "${titulo}"? Esta acción no se puede deshacer.`)) {

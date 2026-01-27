@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { createInstante, generateSlug, AREAS, AreaId } from '@/lib/firestore';
+import { useAuth } from '@/lib/auth';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 const MDEditor = dynamic(
@@ -14,6 +15,7 @@ const MDEditor = dynamic(
 
 export default function NuevoInstantePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -28,12 +30,19 @@ export default function NuevoInstantePage() {
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError('');
+
+    if (!user?.uid) {
+      setError('Debes estar autenticado para crear un instante');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const slug = generateSlug(titulo);
 
       await createInstante({
+        userId: user.uid,
         titulo,
         fecha,
         area,

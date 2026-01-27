@@ -12,6 +12,7 @@ import {
   AreaId,
   Instante,
 } from '@/lib/firestore';
+import { useAuth } from '@/lib/auth';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 const MDEditor = dynamic(
@@ -23,6 +24,7 @@ export default function EditarInstantePage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -46,6 +48,12 @@ export default function EditarInstantePage() {
           return;
         }
 
+        // Verificar que el usuario es el propietario
+        if (user && instante.userId !== user.uid) {
+          setNotFound(true);
+          return;
+        }
+
         setTitulo(instante.titulo);
         setFecha(instante.fecha);
         setArea(instante.area);
@@ -62,17 +70,24 @@ export default function EditarInstantePage() {
     };
 
     loadInstante();
-  }, [id]);
+  }, [id, user]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError('');
+
+    if (!user?.uid) {
+      setError('Debes estar autenticado para editar un instante');
+      return;
+    }
+
     setSaving(true);
 
     try {
       const slug = generateSlug(titulo);
 
       await updateInstante(id, {
+        userId: user.uid,
         titulo,
         fecha,
         area,

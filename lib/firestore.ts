@@ -88,6 +88,7 @@ export type AreaId = typeof AREAS[number]['id'];
 // Interfaz para un Instante
 export interface Instante {
   id?: string;
+  userId: string; // ID del usuario propietario (v0.5 multi-tenant)
   titulo: string;
   fecha: string;
   area: AreaId;
@@ -102,6 +103,7 @@ export interface Instante {
 
 // Interfaz para crear/actualizar
 export interface InstanteInput {
+  userId: string; // ID del usuario propietario (v0.5 multi-tenant)
   titulo: string;
   fecha: string;
   area: AreaId;
@@ -359,3 +361,174 @@ export async function getEstadisticas() {
     totalAreas: AREAS.length,
   };
 }
+
+// ==================== NUEVAS FUNCIONES v0.5 - MULTI-TENANT ====================
+
+// Obtener todos los instantes de un usuario
+export async function getInstantesByUser(userId: string): Promise<Instante[]> {
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where('userId', '==', userId),
+    orderBy('fecha', 'desc')
+  );
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Instante[];
+}
+
+// ==================== FUNCIONES PÚBLICAS GLOBALES (TODOS LOS USUARIOS) ====================
+
+// Obtener instantes públicos de TODOS los usuarios (para home, archivo, etc.)
+export async function getGlobalPublicInstantes(): Promise<Instante[]> {
+  const allInstantes = await getAllInstantes();
+
+  return allInstantes.filter(i => {
+    const esPublico = i.privado === false || !i.hasOwnProperty('privado');
+    const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+    return esPublico && esVisible;
+  });
+}
+
+// Obtener instantes públicos por área de TODOS los usuarios
+export async function getGlobalPublicInstantesByArea(areaId: string): Promise<Instante[]> {
+  const allInstantes = await getAllInstantes();
+
+  return allInstantes.filter(i => {
+    const matchArea = i.area === areaId;
+    const esPublico = i.privado === false || !i.hasOwnProperty('privado');
+    const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+    return matchArea && esPublico && esVisible;
+  });
+}
+
+// Obtener áreas con último instante de TODOS los usuarios (para home)
+export async function getGlobalAreasConUltimoInstante(): Promise<AreaConUltimoInstante[]> {
+  const allInstantes = await getGlobalPublicInstantes();
+
+  return AREAS.map(area => {
+    const instantesDeArea = allInstantes.filter(i => {
+      const esPublico = i.privado === false || !i.hasOwnProperty('privado');
+      const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+      return i.area === area.id && esPublico && esVisible;
+    });
+    const ultimoInstante = instantesDeArea.length > 0 ? instantesDeArea[0] : null;
+
+    return {
+      id: area.id,
+      nombre: area.nombre,
+      emoji: area.emoji,
+      definicion: area.definicion,
+      ultimoInstante,
+      totalInstantes: instantesDeArea.length,
+    };
+  });
+}
+
+// Obtener estadísticas globales (de todos los usuarios públicos)
+export async function getGlobalEstadisticas() {
+  const allInstantes = await getGlobalPublicInstantes();
+
+  const pensamientos = allInstantes.filter(i => i.tipo === 'pensamiento').length;
+  const acciones = allInstantes.filter(i => i.tipo === 'accion').length;
+  const areasActivas = new Set(allInstantes.map(i => i.area)).size;
+
+  return {
+    totalInstantes: allInstantes.length,
+    pensamientos,
+    acciones,
+    areasActivas,
+    totalAreas: AREAS.length,
+  };
+}
+
+// ==================== FUNCIONES POR USUARIO (PARA ADMIN) ====================
+
+// Obtener instantes públicos de un usuario (para páginas personales)
+export async function getPublicInstantesByUser(userId: string): Promise<Instante[]> {
+  const allInstantes = await getInstantesByUser(userId);
+
+  return allInstantes.filter(i => {
+    const esPublico = i.privado === false || !i.hasOwnProperty('privado');
+    const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+    return esPublico && esVisible;
+  });
+}
+
+// Obtener instantes públicos de un usuario por área
+export async function getPublicInstantesByUserAndArea(userId: string, areaId: string): Promise<Instante[]> {
+  const allInstantes = await getInstantesByUser(userId);
+
+  return allInstantes.filter(i => {
+    const matchArea = i.area === areaId;
+    const esPublico = i.privado === false || !i.hasOwnProperty('privado');
+    const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+    return matchArea && esPublico && esVisible;
+  });
+}
+
+// Obtener instante público por slug de un usuario específico
+export async function getPublicInstanteByUserAndSlug(userId: string, areaId: string, slug: string): Promise<Instante | null> {
+  const allInstantes = await getInstantesByUser(userId);
+
+  const instante = allInstantes.find(i => {
+    const matchArea = i.area === areaId;
+    const matchSlug = i.slug === slug;
+    const esPublico = i.privado === false || !i.hasOwnProperty('privado');
+    const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+    return matchArea && matchSlug && esPublico && esVisible;
+  });
+
+  return instante || null;
+}
+
+// Obtener áreas con último instante de un usuario
+export async function getAreasConUltimoInstanteByUser(userId: string): Promise<AreaConUltimoInstante[]> {
+  const allInstantes = await getInstantesByUser(userId);
+
+  return AREAS.map(area => {
+    const instantesDeArea = allInstantes.filter(i => {
+      const esPublico = i.privado === false || !i.hasOwnProperty('privado');
+      const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+      return i.area === area.id && esPublico && esVisible;
+    });
+    const ultimoInstante = instantesDeArea.length > 0 ? instantesDeArea[0] : null;
+
+    return {
+      id: area.id,
+      nombre: area.nombre,
+      emoji: area.emoji,
+      definicion: area.definicion,
+      ultimoInstante,
+      totalInstantes: instantesDeArea.length,
+    };
+  });
+}
+
+// Obtener estadísticas de un usuario
+export async function getEstadisticasByUser(userId: string) {
+  const allInstantes = await getInstantesByUser(userId);
+
+  const instantesVisibles = allInstantes.filter(i => {
+    const esPublico = i.privado === false || !i.hasOwnProperty('privado');
+    const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+    return esPublico && esVisible;
+  });
+
+  const pensamientos = instantesVisibles.filter(i => i.tipo === 'pensamiento').length;
+  const acciones = instantesVisibles.filter(i => i.tipo === 'accion').length;
+  const areasActivas = new Set(instantesVisibles.map(i => i.area)).size;
+
+  return {
+    totalInstantes: instantesVisibles.length,
+    pensamientos,
+    acciones,
+    areasActivas,
+    totalAreas: AREAS.length,
+  };
+}
+
+// ==================== FIN NUEVAS FUNCIONES v0.5 ====================

@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/lib/AuthContext';
+import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
@@ -10,12 +10,12 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, logout, isAdmin } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/admin/login');
+      router.push('/login');
     }
   }, [user, loading, router]);
 
@@ -63,6 +63,20 @@ export default function AdminLayout({
                 >
                   Estadísticas
                 </Link>
+                {isAdmin && (
+                  <Link
+                    href="/admin/invitaciones"
+                    className="text-gray-600 hover:text-gray-900 text-sm"
+                  >
+                    Invitaciones
+                  </Link>
+                )}
+                <Link
+                  href="/admin/configuracion"
+                  className="text-gray-600 hover:text-gray-900 text-sm"
+                >
+                  Configuración
+                </Link>
                 <Link
                   href="/"
                   className="text-gray-600 hover:text-gray-900 text-sm"
@@ -77,7 +91,7 @@ export default function AdminLayout({
                 {user.email}
               </span>
               <button
-                onClick={() => signOut()}
+                onClick={() => logout()}
                 className="text-sm text-red-600 hover:text-red-700"
               >
                 Cerrar sesión

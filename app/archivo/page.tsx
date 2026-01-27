@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getAllInstantes, Instante, AREAS, AreaId } from '@/lib/firestore';
+import { getGlobalPublicInstantes, Instante, AREAS, AreaId } from '@/lib/firestore';
 import InstanteCard from '@/components/InstanteCard';
 
 export default function ArchivoPage() {
@@ -20,14 +20,9 @@ export default function ArchivoPage() {
   useEffect(() => {
     const loadInstantes = async () => {
       try {
-        const allInstantes = await getAllInstantes();
-        // Filtrar: solo (públicos O sin campo privado) Y (publicados O sin campo estado)
-        const instantesFiltrados = allInstantes.filter(i => {
-          const esPublico = i.privado === false || !i.hasOwnProperty('privado');
-          const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
-          return esPublico && esVisible;
-        });
-        setInstantes(instantesFiltrados);
+        // Obtener instantes públicos de TODOS los usuarios
+        const data = await getGlobalPublicInstantes();
+        setInstantes(data);
       } catch (error) {
         console.error('Error cargando instantes:', error);
       } finally {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getAreasConUltimoInstante, getEstadisticas, AreaConUltimoInstante } from '@/lib/firestore';
+import { getGlobalAreasConUltimoInstante, getGlobalEstadisticas, AreaConUltimoInstante } from '@/lib/firestore';
 import AreaCard from '@/components/AreaCard';
 import Stats from '@/components/Stats';
 
@@ -21,8 +21,8 @@ export default function HomePage() {
     const loadData = async () => {
       try {
         const [areasData, statsData] = await Promise.all([
-          getAreasConUltimoInstante(),
-          getEstadisticas(),
+          getGlobalAreasConUltimoInstante(),
+          getGlobalEstadisticas(),
         ]);
         setAreas(areasData);
         setStats(statsData);
