@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getPublicInstanteBySlug, getAreaInfo, Instante } from '@/lib/firestore';
+import { getAllInstantes, getAreaInfo, Instante } from '@/lib/firestore';
 import { remark } from 'remark';
 import html from 'remark-html';
 
@@ -25,17 +25,26 @@ export default function InstantePage() {
   useEffect(() => {
     const loadInstante = async () => {
       try {
-        const data = await getPublicInstanteBySlug(areaId, slug);
-        if (!data) {
+        const allInstantes = await getAllInstantes();
+        // Filtrar: por área Y slug Y (públicos O sin campo privado) Y (publicados O sin campo estado)
+        const instante = allInstantes.find(i => {
+          const matchArea = i.area === areaId;
+          const matchSlug = i.slug === slug;
+          const esPublico = !i.privado || i.privado === false;
+          const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+          return matchArea && matchSlug && esPublico && esVisible;
+        });
+
+        if (!instante) {
           setNotFoundState(true);
           return;
         }
-        setInstante(data);
+        setInstante(instante);
 
         // Convertir Markdown a HTML
         const processedContent = await remark()
           .use(html)
-          .process(data.content);
+          .process(instante.content);
         setContentHtml(processedContent.toString());
       } catch (error) {
         console.error('Error cargando instante:', error);

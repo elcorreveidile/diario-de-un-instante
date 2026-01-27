@@ -309,10 +309,15 @@ export async function deleteInstante(id: string): Promise<void> {
 
 // Obtener áreas con su último instante
 export async function getAreasConUltimoInstante(): Promise<AreaConUltimoInstante[]> {
-  const allInstantes = await getPublicInstantes(); // CAMBIO V0.2: Solo públicos publicados
+  const allInstantes = await getAllInstantes(); // FIX: Usar getAllInstantes y filtrar por compatibilidad
 
   return AREAS.map(area => {
-    const instantesDeArea = allInstantes.filter(i => i.area === area.id);
+    // Filtrar instantes: solo los que son públicos Y (publicados O no tienen campo estado)
+    const instantesDeArea = allInstantes.filter(i => {
+      const esPublico = !i.privado || i.privado === false;
+      const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+      return i.area === area.id && esPublico && esVisible;
+    });
     const ultimoInstante = instantesDeArea.length > 0 ? instantesDeArea[0] : null;
 
     return {
@@ -333,14 +338,21 @@ export function getAreaInfo(areaId: string) {
 
 // Obtener estadísticas
 export async function getEstadisticas() {
-  const allInstantes = await getPublicInstantes(); // CAMBIO V0.2: Solo públicos publicados
+  const allInstantes = await getAllInstantes(); // FIX: Usar getAllInstantes y filtrar por compatibilidad
 
-  const pensamientos = allInstantes.filter(i => i.tipo === 'pensamiento').length;
-  const acciones = allInstantes.filter(i => i.tipo === 'accion').length;
-  const areasActivas = new Set(allInstantes.map(i => i.area)).size;
+  // Filtrar solo los que son públicos Y (publicados O no tienen campo estado)
+  const instantesVisibles = allInstantes.filter(i => {
+    const esPublico = !i.privado || i.privado === false;
+    const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+    return esPublico && esVisible;
+  });
+
+  const pensamientos = instantesVisibles.filter(i => i.tipo === 'pensamiento').length;
+  const acciones = instantesVisibles.filter(i => i.tipo === 'accion').length;
+  const areasActivas = new Set(instantesVisibles.map(i => i.area)).size;
 
   return {
-    totalInstantes: allInstantes.length,
+    totalInstantes: instantesVisibles.length,
     pensamientos,
     acciones,
     areasActivas,

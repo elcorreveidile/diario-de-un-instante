@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getPublicInstantesByArea, getAreaInfo, Instante } from '@/lib/firestore';
+import { getAllInstantes, getAreaInfo, Instante } from '@/lib/firestore';
 import InstanteCard from '@/components/InstanteCard';
 
 export default function AreaPage() {
@@ -19,8 +19,15 @@ export default function AreaPage() {
   useEffect(() => {
     const loadInstantes = async () => {
       try {
-        const data = await getPublicInstantesByArea(areaId);
-        setInstantes(data);
+        const allInstantes = await getAllInstantes();
+        // Filtrar: solo del área Y (públicos O sin campo privado) Y (publicados O sin campo estado)
+        const instantesFiltrados = allInstantes.filter(i => {
+          const esAreaCorrecta = i.area === areaId;
+          const esPublico = !i.privado || i.privado === false;
+          const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
+          return esAreaCorrecta && esPublico && esVisible;
+        });
+        setInstantes(instantesFiltrados);
       } catch (error) {
         console.error('Error cargando instantes:', error);
       } finally {
