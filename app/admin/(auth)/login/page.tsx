@@ -48,7 +48,7 @@ export default function LoginPage() {
           <Link href="/" className="text-2xl font-light text-gray-900">
             Diario de un Instante
           </Link>
-          <p className="mt-2 text-gray-500">Panel de Administración</p>
+          <p className="mt-2 text-gray-500">Panel de administración</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">

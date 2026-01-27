@@ -42,7 +42,7 @@ export default function AdminLayout({
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-6">
               <Link href="/admin" className="font-semibold text-gray-900">
-                Panel Admin
+                Panel admin
               </Link>
               <nav className="hidden sm:flex gap-4">
                 <Link
