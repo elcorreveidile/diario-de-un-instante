@@ -1,41 +1,50 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getInstantesByArea, getAreaInfo, AREAS } from '@/lib/getInstantes';
+import { getInstantesByArea, getAreaInfo, Instante } from '@/lib/firestore';
 import InstanteCard from '@/components/InstanteCard';
 
-interface AreaPageProps {
-  params: { area: string };
-}
+export default function AreaPage() {
+  const params = useParams();
+  const areaId = params.area as string;
 
-// Genera las rutas estáticas para todas las áreas
-export async function generateStaticParams() {
-  return AREAS.map((area) => ({
-    area: area.id,
-  }));
-}
+  const [instantes, setInstantes] = useState<Instante[]>([]);
+  const [loading, setLoading] = useState(true);
 
-// Genera metadatos dinámicos
-export async function generateMetadata({ params }: AreaPageProps) {
-  const areaInfo = getAreaInfo(params.area);
+  const areaInfo = getAreaInfo(areaId);
 
-  if (!areaInfo) {
-    return { title: 'Área no encontrada' };
-  }
+  useEffect(() => {
+    const loadInstantes = async () => {
+      try {
+        const data = await getInstantesByArea(areaId);
+        setInstantes(data);
+      } catch (error) {
+        console.error('Error cargando instantes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  return {
-    title: `${areaInfo.nombre} | Diario de un Instante`,
-    description: `Todos los instantes registrados en el área de ${areaInfo.nombre}`,
-  };
-}
-
-export default async function AreaPage({ params }: AreaPageProps) {
-  const areaInfo = getAreaInfo(params.area);
+    loadInstantes();
+  }, [areaId]);
 
   if (!areaInfo) {
     notFound();
   }
 
-  const instantes = await getInstantesByArea(params.area);
+  if (loading) {
+    return (
+      <div className="container-page">
+        <div className="text-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-500">Cargando instantes...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-page">
@@ -72,7 +81,7 @@ export default async function AreaPage({ params }: AreaPageProps) {
         <section>
           <div className="space-y-4">
             {instantes.map((instante) => (
-              <InstanteCard key={instante.slug} instante={instante} />
+              <InstanteCard key={instante.id || instante.slug} instante={instante} />
             ))}
           </div>
         </section>
@@ -81,12 +90,12 @@ export default async function AreaPage({ params }: AreaPageProps) {
           <p className="text-gray-400 mb-4">
             Aún no hay instantes registrados en esta área.
           </p>
-          <p className="text-sm text-gray-300">
-            Los instantes aparecerán aquí cuando los agregues en la carpeta
-            <code className="bg-gray-100 px-2 py-1 rounded mx-1">
-              content/{params.area}/
-            </code>
-          </p>
+          <Link
+            href="/admin/nuevo"
+            className="inline-block mt-2 text-gray-900 hover:underline"
+          >
+            Crear el primer instante
+          </Link>
         </section>
       )}
     </div>

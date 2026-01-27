@@ -1,16 +1,30 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getAllInstantes, getAreaInfo } from '@/lib/getInstantes';
+import { getAllInstantes, Instante } from '@/lib/firestore';
 import InstanteCard from '@/components/InstanteCard';
 
-export const metadata = {
-  title: 'Archivo | Diario de un Instante',
-  description: 'Todos los instantes registrados, ordenados cronológicamente.',
-};
+export default function ArchivoPage() {
+  const [instantes, setInstantes] = useState<Instante[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function ArchivoPage() {
-  const instantes = await getAllInstantes();
+  useEffect(() => {
+    const loadInstantes = async () => {
+      try {
+        const data = await getAllInstantes();
+        setInstantes(data);
+      } catch (error) {
+        console.error('Error cargando instantes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInstantes();
+  }, []);
 
   // Agrupar por mes para mejor organización
   const instantesPorMes = instantes.reduce((acc, instante) => {
@@ -21,6 +35,17 @@ export default async function ArchivoPage() {
     acc[mes].push(instante);
     return acc;
   }, {} as Record<string, typeof instantes>);
+
+  if (loading) {
+    return (
+      <div className="container-page">
+        <div className="text-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-500">Cargando archivo...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-page">
@@ -72,7 +97,7 @@ export default async function ArchivoPage() {
               <div className="space-y-4">
                 {instantesDelMes.map((instante) => (
                   <InstanteCard
-                    key={`${instante.area}-${instante.slug}`}
+                    key={instante.id || `${instante.area}-${instante.slug}`}
                     instante={instante}
                     showArea={true}
                   />
@@ -86,10 +111,12 @@ export default async function ArchivoPage() {
           <p className="text-gray-400 mb-4">
             Aún no hay instantes registrados.
           </p>
-          <p className="text-sm text-gray-300">
-            Comienza agregando archivos .md en la carpeta
-            <code className="bg-gray-100 px-2 py-1 rounded mx-1">content/</code>
-          </p>
+          <Link
+            href="/admin/nuevo"
+            className="inline-block mt-2 text-gray-900 hover:underline"
+          >
+            Crear el primer instante
+          </Link>
         </section>
       )}
     </div>
