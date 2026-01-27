@@ -213,7 +213,7 @@ export default function EditarInstantePage() {
           <MDEditor
             value={content}
             onChange={(val) => setContent(val || '')}
-            preview="live"
+            preview="edit"
             height={700}
             visibleDragbar={false}
             highlightEnable={false}

@@ -9,6 +9,7 @@ import { es } from 'date-fns/locale';
 import { getAllInstantes, getAreaInfo, Instante } from '@/lib/firestore';
 import { remark } from 'remark';
 import html from 'remark-html';
+import remarkExternalLinks from 'remark-external-links';
 
 export default function InstantePage() {
   const params = useParams();
@@ -44,6 +45,7 @@ export default function InstantePage() {
         // Convertir Markdown a HTML
         const processedContent = await remark()
           .use(html)
+          .use(remarkExternalLinks, { target: '_blank', rel: ['noopener'] })
           .process(instante.content);
         setContentHtml(processedContent.toString());
       } catch (error) {
