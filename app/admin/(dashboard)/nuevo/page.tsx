@@ -3,7 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { createInstante, generateSlug, AREAS, AreaId } from '@/lib/firestore';
+
+const MDEditor = dynamic(
+  () => import('@uiw/react-md-editor'),
+  { ssr: false }
+);
 
 export default function NuevoInstantePage() {
   const router = useRouter();
@@ -15,6 +21,8 @@ export default function NuevoInstantePage() {
   const [area, setArea] = useState<AreaId>('trabajo');
   const [tipo, setTipo] = useState<'pensamiento' | 'accion'>('pensamiento');
   const [content, setContent] = useState('');
+  const [estado, setEstado] = useState<'borrador' | 'publicado'>('borrador');
+  const [privado, setPrivado] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +39,8 @@ export default function NuevoInstantePage() {
         tipo,
         slug,
         content,
+        estado,
+        privado,
       });
 
       router.push('/admin');
@@ -133,22 +143,56 @@ export default function NuevoInstantePage() {
         </div>
 
         {/* Contenido */}
-        <div>
+        <div data-color-mode="auto">
           <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
             Contenido *
           </label>
-          <textarea
-            id="content"
+          <MDEditor
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-            rows={10}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none resize-y"
-            placeholder="Escribe tu reflexión o describe lo que hiciste. Puedes usar Markdown para dar formato."
+            onChange={(val) => setContent(val || '')}
+            preview="live"
+            height={400}
+            textareaProps={{
+              id: 'content',
+              required: true,
+            }}
           />
           <p className="mt-1 text-xs text-gray-500">
-            Puedes usar Markdown: **negrita**, *cursiva*, ## títulos, - listas
+            Puedes usar Markdown: **negrita**, *cursiva*, ## títulos, - listas, [enlaces](url)
           </p>
+        </div>
+
+        {/* Estado y Privacidad */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="estado" className="block text-sm font-medium text-gray-700 mb-1">
+              Estado *
+            </label>
+            <select
+              id="estado"
+              value={estado}
+              onChange={(e) => setEstado(e.target.value as 'borrador' | 'publicado')}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none bg-white"
+            >
+              <option value="borrador">📝 Borrador</option>
+              <option value="publicado">✅ Publicado</option>
+            </select>
+          </div>
+
+          <div className="flex items-center">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={privado}
+                onChange={(e) => setPrivado(e.target.checked)}
+                className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900"
+              />
+              <div>
+                <span className="block text-sm font-medium text-gray-700">Marcado como privado</span>
+                <span className="block text-xs text-gray-500">No se mostrará en el sitio público</span>
+              </div>
+            </label>
+          </div>
         </div>
 
         {/* Botones */}

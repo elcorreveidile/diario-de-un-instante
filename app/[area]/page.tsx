@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getInstantesByArea, getAreaInfo, Instante } from '@/lib/firestore';
+import { getPublicInstantesByArea, getAreaInfo, Instante } from '@/lib/firestore';
 import InstanteCard from '@/components/InstanteCard';
 
 export default function AreaPage() {
@@ -19,7 +19,7 @@ export default function AreaPage() {
   useEffect(() => {
     const loadInstantes = async () => {
       try {
-        const data = await getInstantesByArea(areaId);
+        const data = await getPublicInstantesByArea(areaId);
         setInstantes(data);
       } catch (error) {
         console.error('Error cargando instantes:', error);

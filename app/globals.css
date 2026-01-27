@@ -154,3 +154,155 @@
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-400 dark:bg-gray-500;
 }
+
+/* ==================== ESTILOS @uiw/react-md-editor ==================== */
+
+.w-md-editor {
+  background-color: white !important;
+}
+
+.w-md-editor-text-pre,
+.w-md-editor-text-input,
+.w-md-editor-preview {
+  background-color: white !important;
+  color: #1a1a1a;
+}
+
+.dark .w-md-editor {
+  background-color: #1f2937 !important;
+}
+
+.dark .w-md-editor-text-pre,
+.dark .w-md-editor-text-input,
+.dark .w-md-editor-preview {
+  background-color: #1f2937 !important;
+  color: #f9fafb;
+}
+
+.w-md-editor-toolbar {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .w-md-editor-toolbar {
+  background-color: #374151;
+  border-bottom: 1px solid #4b5563;
+}
+
+.w-md-editor-toolbar button {
+  color: #4b5563;
+}
+
+.dark .w-md-editor-toolbar button {
+  color: #d1d5db;
+}
+
+.w-md-editor-toolbar button:hover {
+  background-color: #e5e7eb;
+}
+
+.dark .w-md-editor-toolbar button:hover {
+  background-color: #4b5563;
+}
+
+.w-md-editor-toolbar button.w-md-editor-toolbar-active {
+  background-color: #e5e7eb;
+  color: #1a1a1a;
+}
+
+.dark .w-md-editor-toolbar button.w-md-editor-toolbar-active {
+  background-color: #4b5563;
+  color: #f9fafb;
+}
+
+/* Enlaces en el editor */
+.w-md-editor-preview a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.dark .w-md-editor-preview a {
+  color: #60a5fa;
+}
+
+.w-md-editor-preview a:hover {
+  color: #1d4ed8;
+}
+
+.dark .w-md-editor-preview a:hover {
+  color: #93c5fd;
+}
+
+/* Code blocks en el editor */
+.w-md-editor-preview pre {
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+
+.dark .w-md-editor-preview pre {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+}
+
+.w-md-editor-preview code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.dark .w-md-editor-preview code {
+  background-color: #1f2937;
+}
+
+.w-md-editor-preview pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* Listas en el editor */
+.w-md-editor-preview ul,
+.w-md-editor-preview ol {
+  padding-left: 1.5rem;
+}
+
+.w-md-editor-preview li {
+  margin: 0.25rem 0;
+}
+
+/* Blockquotes en el editor */
+.w-md-editor-preview blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  color: #6b7280;
+}
+
+.dark .w-md-editor-preview blockquote {
+  border-left-color: #4b5563;
+  color: #9ca3af;
+}
+
+/* Tablas en el editor */
+.w-md-editor-preview table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.w-md-editor-preview th,
+.w-md-editor-preview td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem;
+}
+
+.dark .w-md-editor-preview th,
+.dark .w-md-editor-preview td {
+  border-color: #374151;
+}
+
+.w-md-editor-preview th {
+  background-color: #f9fafb;
+}
+
+.dark .w-md-editor-preview th {
+  background-color: #1f2937;
+}

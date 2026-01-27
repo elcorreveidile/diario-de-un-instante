@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getAllInstantes, deleteInstante, AREAS, Instante } from '@/lib/firestore';
+import {
+  getAllInstantes,
+  getInstantesByEstado,
+  deleteInstante,
+  AREAS,
+  Instante
+} from '@/lib/firestore';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -10,10 +16,27 @@ export default function AdminPage() {
   const [instantes, setInstantes] = useState<Instante[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [filtro, setFiltro] = useState<'todos' | 'borradores' | 'publicados' | 'privados'>('todos');
 
   const loadInstantes = async () => {
     try {
-      const data = await getAllInstantes();
+      let data: Instante[];
+
+      switch (filtro) {
+        case 'borradores':
+          data = await getInstantesByEstado('borrador');
+          break;
+        case 'publicados':
+          data = await getInstantesByEstado('publicado');
+          break;
+        case 'privados':
+          const allInstantes = await getAllInstantes();
+          data = allInstantes.filter(i => i.privado);
+          break;
+        default:
+          data = await getAllInstantes();
+      }
+
       setInstantes(data);
     } catch (error) {
       console.error('Error cargando instantes:', error);
@@ -24,7 +47,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     loadInstantes();
-  }, []);
+  }, [filtro]);
 
   const handleDelete = async (id: string, titulo: string) => {
     if (!confirm(`¿Eliminar "${titulo}"? Esta acción no se puede deshacer.`)) {
@@ -74,6 +97,50 @@ export default function AdminPage() {
         </Link>
       </div>
 
+      {/* Filtros */}
+      <div className="mb-6 flex flex-wrap gap-2">
+        <button
+          onClick={() => setFiltro('todos')}
+          className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+            filtro === 'todos'
+              ? 'bg-gray-900 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          Todos ({instantes.length})
+        </button>
+        <button
+          onClick={() => setFiltro('borradores')}
+          className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+            filtro === 'borradores'
+              ? 'bg-amber-100 text-amber-800'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          📝 Borradores
+        </button>
+        <button
+          onClick={() => setFiltro('publicados')}
+          className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+            filtro === 'publicados'
+              ? 'bg-emerald-100 text-emerald-800'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          ✅ Publicados
+        </button>
+        <button
+          onClick={() => setFiltro('privados')}
+          className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+            filtro === 'privados'
+              ? 'bg-rose-100 text-rose-800'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          🔒 Privados
+        </button>
+      </div>
+
       {instantes.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
           <span className="text-4xl mb-4 block">📝</span>
@@ -119,11 +186,23 @@ export default function AdminPage() {
                               : 'bg-emerald-500'
                           }`}
                         ></span>
-                        <div>
+                        <div className="flex-1">
                           <p className="font-medium text-gray-900">{instante.titulo}</p>
-                          <p className="text-sm text-gray-500 sm:hidden">
-                            {area?.emoji} {area?.nombre}
-                          </p>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            {instante.estado === 'borrador' && (
+                              <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">
+                                Borrador
+                              </span>
+                            )}
+                            {instante.privado && (
+                              <span className="text-xs px-2 py-0.5 bg-rose-100 text-rose-700 rounded-full">
+                                Privado
+                              </span>
+                            )}
+                            <p className="text-sm text-gray-500 sm:hidden">
+                              {area?.emoji} {area?.nombre}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </td>

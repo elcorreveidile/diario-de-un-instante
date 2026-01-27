@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getAllInstantes, Instante } from '@/lib/firestore';
+import { getPublicInstantes, Instante } from '@/lib/firestore';
 import InstanteCard from '@/components/InstanteCard';
 
 export default function ArchivoPage() {
@@ -14,7 +14,7 @@ export default function ArchivoPage() {
   useEffect(() => {
     const loadInstantes = async () => {
       try {
-        const data = await getAllInstantes();
+        const data = await getPublicInstantes();
         setInstantes(data);
       } catch (error) {
         console.error('Error cargando instantes:', error);
