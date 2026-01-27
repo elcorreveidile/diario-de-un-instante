@@ -15,17 +15,72 @@ import { db } from './firebase';
 
 // Definición de las 11 áreas de vida
 export const AREAS = [
-  { id: 'trabajo', nombre: 'Trabajo', emoji: '💼' },
-  { id: 'aprendizaje', nombre: 'Aprendizaje', emoji: '📚' },
-  { id: 'salud', nombre: 'Salud', emoji: '🏃' },
-  { id: 'gestion-cultural', nombre: 'Gestión cultural', emoji: '🎭' },
-  { id: 'ocio', nombre: 'Ocio', emoji: '🎮' },
-  { id: 'creacion', nombre: 'Creación', emoji: '✨' },
-  { id: 'tecnologia', nombre: 'Tecnología', emoji: '💻' },
-  { id: 'amistades', nombre: 'Amistades', emoji: '👥' },
-  { id: 'familia', nombre: 'Familia', emoji: '🏠' },
-  { id: 'entorno', nombre: 'Entorno', emoji: '🌱' },
-  { id: 'finanzas', nombre: 'Finanzas', emoji: '💰' },
+  {
+    id: 'trabajo',
+    nombre: 'Trabajo',
+    emoji: '💼',
+    definicion: 'Mi oficio, el servicio que ofrezco y el valor que genero en el mundo.'
+  },
+  {
+    id: 'aprendizaje',
+    nombre: 'Aprendizaje',
+    emoji: '📚',
+    definicion: 'El ejercicio de expandir mi mundo interior y mis capacidades.'
+  },
+  {
+    id: 'salud',
+    nombre: 'Salud',
+    emoji: '🏃',
+    definicion: 'El pilar que sostiene toda mi energía, claridad y bienestar.'
+  },
+  {
+    id: 'gestion-cultural',
+    nombre: 'Gestión Cultural',
+    emoji: '🎭',
+    definicion: 'Construir puentes y ser un agente activo en el mundo de las ideas y el arte.'
+  },
+  {
+    id: 'ocio',
+    nombre: 'Ocio',
+    emoji: '🎮',
+    definicion: 'El espacio para la alegría pura, el juego y la recreación sin culpa.'
+  },
+  {
+    id: 'creacion',
+    nombre: 'Creación',
+    emoji: '✨',
+    definicion: 'El taller de mi alma, donde mi voz literaria encuentra forma y se expresa.'
+  },
+  {
+    id: 'amistades',
+    nombre: 'Amistades',
+    emoji: '👥',
+    definicion: 'Los lazos que elijo y que nutren, desafían y celebran mi camino.'
+  },
+  {
+    id: 'familia',
+    nombre: 'Familia',
+    emoji: '🏠',
+    definicion: 'Mi raíz, mi origen y el núcleo incondicional de mi historia.'
+  },
+  {
+    id: 'entorno',
+    nombre: 'Entorno',
+    emoji: '🌱',
+    definicion: 'Diseñar el espacio físico y los sistemas que me rodean para potenciar mi vida.'
+  },
+  {
+    id: 'finanzas',
+    nombre: 'Finanzas',
+    emoji: '💰',
+    definicion: 'La herramienta que me da libertad, seguridad y la capacidad de construir mis sueños.'
+  },
+  {
+    id: 'tecnologia',
+    nombre: 'Tecnología',
+    emoji: '💻',
+    definicion: 'El taller donde mis ideas digitales toman forma y se hacen realidad.'
+  },
 ] as const;
 
 export type AreaId = typeof AREAS[number]['id'];
@@ -58,6 +113,7 @@ export interface AreaConUltimoInstante {
   id: AreaId;
   nombre: string;
   emoji: string;
+  definicion: string;
   ultimoInstante: Instante | null;
   totalInstantes: number;
 }
@@ -181,6 +237,7 @@ export async function getAreasConUltimoInstante(): Promise<AreaConUltimoInstante
       id: area.id,
       nombre: area.nombre,
       emoji: area.emoji,
+      definicion: area.definicion,
       ultimoInstante,
       totalInstantes: instantesDeArea.length,
     };
