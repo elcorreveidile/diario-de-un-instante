@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { getAreasConUltimoInstante, getEstadisticas, AreaConUltimoInstante } from '@/lib/firestore';
 import AreaCard from '@/components/AreaCard';
 import Stats from '@/components/Stats';
@@ -52,10 +53,19 @@ export default function HomePage() {
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
           Diario de un Instante
         </h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <p className="text-gray-600 max-w-2xl mx-auto mb-6">
           Un jardín digital para cultivar un año 2026 más consciente y con propósito.
           Capturando pensamientos y acciones, un instante a la vez.
         </p>
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors text-sm"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Panel de Admin
+        </Link>
       </section>
 
       {/* Estadísticas */}
