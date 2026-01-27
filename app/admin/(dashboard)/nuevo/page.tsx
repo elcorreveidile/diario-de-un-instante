@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { createInstante, generateSlug, AREAS, AreaId } from '@/lib/firestore';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor'),
@@ -24,8 +25,8 @@ export default function NuevoInstantePage() {
   const [estado, setEstado] = useState<'borrador' | 'publicado'>('borrador');
   const [privado, setPrivado] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setError('');
     setLoading(true);
 
@@ -51,6 +52,12 @@ export default function NuevoInstantePage() {
       setLoading(false);
     }
   };
+
+  // Atajo de teclado: Cmd/Ctrl + S para guardar
+  useHotkeys('mod+s', (e) => {
+    e.preventDefault();
+    handleSubmit();
+  }, { enableOnFormTags: true });
 
   return (
     <div className="max-w-2xl mx-auto">

@@ -12,6 +12,7 @@ import {
   AreaId,
   Instante,
 } from '@/lib/firestore';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor'),
@@ -63,8 +64,8 @@ export default function EditarInstantePage() {
     loadInstante();
   }, [id]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setError('');
     setSaving(true);
 
@@ -90,6 +91,12 @@ export default function EditarInstantePage() {
       setSaving(false);
     }
   };
+
+  // Atajo de teclado: Cmd/Ctrl + S para guardar
+  useHotkeys('mod+s', (e) => {
+    e.preventDefault();
+    handleSubmit();
+  }, { enableOnFormTags: true });
 
   if (loading) {
     return (
