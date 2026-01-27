@@ -13,14 +13,15 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 
-// Definición de las 10 áreas de vida
+// Definición de las 11 áreas de vida
 export const AREAS = [
   { id: 'trabajo', nombre: 'Trabajo', emoji: '💼' },
   { id: 'aprendizaje', nombre: 'Aprendizaje', emoji: '📚' },
   { id: 'salud', nombre: 'Salud', emoji: '🏃' },
-  { id: 'gestion-cultural', nombre: 'Gestión Cultural', emoji: '🎭' },
+  { id: 'gestion-cultural', nombre: 'Gestión cultural', emoji: '🎭' },
   { id: 'ocio', nombre: 'Ocio', emoji: '🎮' },
   { id: 'creacion', nombre: 'Creación', emoji: '✨' },
+  { id: 'tecnologia', nombre: 'Tecnología', emoji: '💻' },
   { id: 'amistades', nombre: 'Amistades', emoji: '👥' },
   { id: 'familia', nombre: 'Familia', emoji: '🏠' },
   { id: 'entorno', nombre: 'Entorno', emoji: '🌱' },

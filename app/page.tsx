@@ -81,7 +81,7 @@ export default function HomePage() {
       {/* Grid de Áreas */}
       <section>
         <h2 className="section-title">
-          Las 10 áreas de mi vida
+          Las 11 áreas de mi vida
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {areas.map((area) => (
