@@ -9,7 +9,6 @@ import { es } from 'date-fns/locale';
 import { getAllInstantes, getAreaInfo, Instante } from '@/lib/firestore';
 import { remark } from 'remark';
 import html from 'remark-html';
-import remarkExternalLinks from 'remark-external-links';
 
 export default function InstantePage() {
   const params = useParams();
@@ -45,9 +44,11 @@ export default function InstantePage() {
         // Convertir Markdown a HTML
         const processedContent = await remark()
           .use(html)
-          .use(remarkExternalLinks, { target: '_blank', rel: ['noopener'] })
           .process(instante.content);
-        setContentHtml(processedContent.toString());
+        let contentHtml = processedContent.toString();
+        // Añadir target="_blank" y rel="noopener" a todos los enlaces
+        contentHtml = contentHtml.replace(/<a href=/g, '<a target="_blank" rel="noopener" href=');
+        setContentHtml(contentHtml);
       } catch (error) {
         console.error('Error cargando instante:', error);
         setNotFoundState(true);
