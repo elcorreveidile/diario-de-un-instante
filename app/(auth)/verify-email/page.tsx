@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { useEffect } from 'react';
@@ -13,7 +13,6 @@ export default function VerifyEmailPage() {
   const [message, setMessage] = useState('');
   const { user, userProfile, sendVerificationEmail } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Si no hay usuario o ya está verificado, redirigir
