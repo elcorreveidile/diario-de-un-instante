@@ -39,8 +39,8 @@ export default function AreaPage() {
     return (
       <div className="container-page">
         <div className="text-center py-20">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-500">Cargando instantes...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 dark:border-white mx-auto"></div>
+          <p className="mt-4 text-gray-500 dark:text-gray-400">Cargando instantes...</p>
         </div>
       </div>
     );
@@ -50,14 +50,14 @@ export default function AreaPage() {
     <div className="container-page">
       {/* Breadcrumb */}
       <nav className="mb-6">
-        <ol className="flex items-center gap-2 text-sm text-gray-500">
+        <ol className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <li>
-            <Link href="/" className="hover:text-gray-700">
+            <Link href="/" className="hover:text-gray-700 dark:hover:text-gray-300">
               Inicio
             </Link>
           </li>
           <li>/</li>
-          <li className="text-gray-900 font-medium">{areaInfo.nombre}</li>
+          <li className="text-gray-900 dark:text-white font-medium">{areaInfo.nombre}</li>
         </ol>
       </nav>
 
@@ -66,10 +66,10 @@ export default function AreaPage() {
         <div className="flex items-center gap-4 mb-4">
           <span className="text-4xl">{areaInfo.emoji}</span>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {areaInfo.nombre}
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-gray-400">
               {instantes.length} {instantes.length === 1 ? 'instante' : 'instantes'} registrados
             </p>
           </div>
@@ -87,12 +87,12 @@ export default function AreaPage() {
         </section>
       ) : (
         <section className="text-center py-16">
-          <p className="text-gray-400 mb-4">
+          <p className="text-gray-400 dark:text-gray-500 mb-4">
             Aún no hay instantes registrados en esta área.
           </p>
           <Link
             href="/admin/nuevo"
-            className="inline-block mt-2 text-gray-900 hover:underline"
+            className="inline-block mt-2 text-gray-900 dark:text-white hover:underline"
           >
             Crear el primer instante
           </Link>

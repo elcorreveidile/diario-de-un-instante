@@ -40,8 +40,8 @@ export default function ArchivoPage() {
     return (
       <div className="container-page">
         <div className="text-center py-20">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-500">Cargando archivo...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 dark:border-white mx-auto"></div>
+          <p className="mt-4 text-gray-500 dark:text-gray-400">Cargando archivo...</p>
         </div>
       </div>
     );
@@ -51,26 +51,26 @@ export default function ArchivoPage() {
     <div className="container-page">
       {/* Breadcrumb */}
       <nav className="mb-6">
-        <ol className="flex items-center gap-2 text-sm text-gray-500">
+        <ol className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <li>
-            <Link href="/" className="hover:text-gray-700">
+            <Link href="/" className="hover:text-gray-700 dark:hover:text-gray-300">
               Inicio
             </Link>
           </li>
           <li>/</li>
-          <li className="text-gray-900 font-medium">Archivo</li>
+          <li className="text-gray-900 dark:text-white font-medium">Archivo</li>
         </ol>
       </nav>
 
       {/* Header */}
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Archivo
         </h1>
-        <p className="text-gray-500">
+        <p className="text-gray-500 dark:text-gray-400">
           Todos los instantes ordenados cronológicamente.
           {instantes.length > 0 && (
-            <span className="ml-2 text-sm text-gray-400">
+            <span className="ml-2 text-sm text-gray-400 dark:text-gray-500">
               ({instantes.length} {instantes.length === 1 ? 'instante' : 'instantes'} en total)
             </span>
           )}
@@ -84,11 +84,11 @@ export default function ArchivoPage() {
             <section key={mes}>
               {/* Separador de mes */}
               <div className="flex items-center gap-4 mb-6">
-                <h2 className="text-lg font-semibold text-gray-700 capitalize whitespace-nowrap">
+                <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 capitalize whitespace-nowrap">
                   {mes}
                 </h2>
-                <div className="flex-1 h-px bg-gray-200" />
-                <span className="text-sm text-gray-400">
+                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                <span className="text-sm text-gray-400 dark:text-gray-500">
                   {instantesDelMes.length} {instantesDelMes.length === 1 ? 'instante' : 'instantes'}
                 </span>
               </div>
@@ -108,12 +108,12 @@ export default function ArchivoPage() {
         </div>
       ) : (
         <section className="text-center py-16">
-          <p className="text-gray-400 mb-4">
+          <p className="text-gray-400 dark:text-gray-500 mb-4">
             Aún no hay instantes registrados.
           </p>
           <Link
             href="/admin/nuevo"
-            className="inline-block mt-2 text-gray-900 hover:underline"
+            className="inline-block mt-2 text-gray-900 dark:text-white hover:underline"
           >
             Crear el primer instante
           </Link>
