@@ -152,7 +152,7 @@ export default function NuevoInstantePage() {
             onChange={(val) => setContent(val || '')}
             preview="live"
             height={400}
-            visibleDragBar={false}
+            visibleDragbar={false}
             highlightEnable={false}
             textareaProps={{
               id: 'content',
