@@ -40,8 +40,8 @@ export default function HomePage() {
     return (
       <div className="container-page">
         <div className="text-center py-20">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-500">Cargando tu diario...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 dark:border-white mx-auto"></div>
+          <p className="mt-4 text-gray-500 dark:text-gray-400">Cargando tu diario...</p>
         </div>
       </div>
     );
@@ -51,16 +51,16 @@ export default function HomePage() {
     <div className="container-page">
       {/* Hero Section */}
       <section className="text-center mb-12">
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
           Diario de un Instante
         </h1>
-        <p className="text-gray-600 max-w-2xl mx-auto mb-6">
+        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
           Un jardín digital para cultivar un año 2026 más consciente y con propósito.
           Capturando pensamientos y acciones, un instante a la vez.
         </p>
         <Link
           href="/admin"
-          className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors text-sm"
+          className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors text-sm"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

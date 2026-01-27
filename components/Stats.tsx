@@ -8,10 +8,10 @@ interface StatsProps {
 
 export default function Stats({ totalInstantes, pensamientos, acciones, areasActivas, totalAreas = 11 }: StatsProps) {
   const stats = [
-    { label: 'Total instantes', value: totalInstantes, color: 'text-gray-900' },
-    { label: 'Pensamientos', value: pensamientos, color: 'text-violet-600' },
-    { label: 'Acciones', value: acciones, color: 'text-emerald-600' },
-    { label: 'Áreas activas', value: `${areasActivas}/${totalAreas}`, color: 'text-amber-600' },
+    { label: 'Total instantes', value: totalInstantes, color: 'text-gray-900 dark:text-white' },
+    { label: 'Pensamientos', value: pensamientos, color: 'text-violet-600 dark:text-violet-400' },
+    { label: 'Acciones', value: acciones, color: 'text-emerald-600 dark:text-emerald-400' },
+    { label: 'Áreas activas', value: `${areasActivas}/${totalAreas}`, color: 'text-amber-600 dark:text-amber-400' },
   ];
 
   return (
@@ -19,12 +19,12 @@ export default function Stats({ totalInstantes, pensamientos, acciones, areasAct
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="bg-gray-50 rounded-lg p-4 text-center"
+          className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-center"
         >
           <p className={`text-2xl font-semibold ${stat.color}`}>
             {stat.value}
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {stat.label}
           </p>
         </div>

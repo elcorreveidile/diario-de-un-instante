@@ -56,8 +56,8 @@ export default function InstantePage() {
     return (
       <div className="container-page max-w-3xl">
         <div className="text-center py-20">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-500">Cargando instante...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 dark:border-white mx-auto"></div>
+          <p className="mt-4 text-gray-500 dark:text-gray-400">Cargando instante...</p>
         </div>
       </div>
     );
@@ -71,52 +71,52 @@ export default function InstantePage() {
     <div className="container-page max-w-3xl">
       {/* Breadcrumb */}
       <nav className="mb-6">
-        <ol className="flex items-center gap-2 text-sm text-gray-500">
+        <ol className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <li>
-            <Link href="/" className="hover:text-gray-700">
+            <Link href="/" className="hover:text-gray-700 dark:hover:text-gray-300">
               Inicio
             </Link>
           </li>
           <li>/</li>
           <li>
-            <Link href={`/${areaId}`} className="hover:text-gray-700">
+            <Link href={`/${areaId}`} className="hover:text-gray-700 dark:hover:text-gray-300">
               {areaInfo.nombre}
             </Link>
           </li>
           <li>/</li>
-          <li className="text-gray-900 font-medium truncate max-w-[200px]">
+          <li className="text-gray-900 dark:text-white font-medium truncate max-w-[200px]">
             {instante.titulo}
           </li>
         </ol>
       </nav>
 
       {/* Artículo */}
-      <article className="bg-white rounded-xl border border-gray-100 p-8">
+      <article className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-8">
         {/* Header */}
-        <header className="mb-8 pb-8 border-b border-gray-100">
+        <header className="mb-8 pb-8 border-b border-gray-100 dark:border-gray-800">
           {/* Área y tipo */}
           <div className="flex items-center gap-3 mb-4">
             <span className="text-2xl">{areaInfo.emoji}</span>
-            <span className="text-sm text-gray-500">{areaInfo.nombre}</span>
-            <span className="text-gray-300">·</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{areaInfo.nombre}</span>
+            <span className="text-gray-300 dark:text-gray-600">·</span>
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
               instante.tipo === 'accion'
-                ? 'bg-emerald-50 text-emerald-700'
-                : 'bg-violet-50 text-violet-700'
+                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                : 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400'
             }`}>
               {instante.tipo === 'accion' ? 'Acción' : 'Pensamiento'}
             </span>
           </div>
 
           {/* Título */}
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
             {instante.titulo}
           </h1>
 
           {/* Fecha */}
           <time
             dateTime={instante.fecha}
-            className="text-sm text-gray-400"
+            className="text-sm text-gray-400 dark:text-gray-500"
           >
             {format(new Date(instante.fecha), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
           </time>
@@ -133,7 +133,7 @@ export default function InstantePage() {
       <nav className="mt-8 flex justify-between">
         <Link
           href={`/${areaId}`}
-          className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-2"
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -142,7 +142,7 @@ export default function InstantePage() {
         </Link>
         <Link
           href="/archivo"
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
         >
           Ver archivo completo
         </Link>
