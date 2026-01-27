@@ -215,6 +215,8 @@ export default function EditarInstantePage() {
             onChange={(val) => setContent(val || '')}
             preview="live"
             height={400}
+            visibleDragBar={false}
+            highlightEnable={false}
             textareaProps={{
               id: 'content',
               required: true,
