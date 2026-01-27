@@ -13,12 +13,17 @@ export default function UsuariosPage() {
   const [message, setMessage] = useState('');
 
   const loadUsuarios = async () => {
+    setLoadingUsuarios(true);
+    setMessage('');
     try {
       const data = await getAllUsuarios();
+      console.log('Usuarios cargados:', data);
       setUsuarios(data.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error cargando usuarios:', error);
-      setMessage('Error al cargar usuarios');
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      setMessage(`Error al cargar: ${error.message || 'Verifica la consola para más detalles'}`);
     } finally {
       setLoadingUsuarios(false);
     }
