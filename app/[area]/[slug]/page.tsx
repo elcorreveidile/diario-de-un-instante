@@ -1,42 +1,69 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getInstanteBySlug, getAreaInfo, getAllInstantes, AREAS } from '@/lib/getInstantes';
+import { getInstanteBySlug, getAreaInfo, Instante } from '@/lib/firestore';
+import { remark } from 'remark';
+import html from 'remark-html';
 
-interface InstantePageProps {
-  params: { area: string; slug: string };
-}
+export default function InstantePage() {
+  const params = useParams();
+  const areaId = params.area as string;
+  const slug = params.slug as string;
 
-// Genera las rutas estáticas para todos los instantes
-export async function generateStaticParams() {
-  const instantes = await getAllInstantes();
+  const [instante, setInstante] = useState<Instante | null>(null);
+  const [contentHtml, setContentHtml] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [notFoundState, setNotFoundState] = useState(false);
 
-  return instantes.map((instante) => ({
-    area: instante.area,
-    slug: instante.slug,
-  }));
-}
+  const areaInfo = getAreaInfo(areaId);
 
-// Genera metadatos dinámicos
-export async function generateMetadata({ params }: InstantePageProps) {
-  const instante = await getInstanteBySlug(params.area, params.slug);
+  useEffect(() => {
+    const loadInstante = async () => {
+      try {
+        const data = await getInstanteBySlug(areaId, slug);
+        if (!data) {
+          setNotFoundState(true);
+          return;
+        }
+        setInstante(data);
 
-  if (!instante) {
-    return { title: 'Instante no encontrado' };
+        // Convertir Markdown a HTML
+        const processedContent = await remark()
+          .use(html)
+          .process(data.content);
+        setContentHtml(processedContent.toString());
+      } catch (error) {
+        console.error('Error cargando instante:', error);
+        setNotFoundState(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInstante();
+  }, [areaId, slug]);
+
+  if (!areaInfo) {
+    notFound();
   }
 
-  return {
-    title: `${instante.titulo} | Diario de un Instante`,
-    description: instante.content.substring(0, 160),
-  };
-}
+  if (loading) {
+    return (
+      <div className="container-page max-w-3xl">
+        <div className="text-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-500">Cargando instante...</p>
+        </div>
+      </div>
+    );
+  }
 
-export default async function InstantePage({ params }: InstantePageProps) {
-  const instante = await getInstanteBySlug(params.area, params.slug);
-  const areaInfo = getAreaInfo(params.area);
-
-  if (!instante || !areaInfo) {
+  if (notFoundState || !instante) {
     notFound();
   }
 
@@ -52,7 +79,7 @@ export default async function InstantePage({ params }: InstantePageProps) {
           </li>
           <li>/</li>
           <li>
-            <Link href={`/${params.area}`} className="hover:text-gray-700">
+            <Link href={`/${areaId}`} className="hover:text-gray-700">
               {areaInfo.nombre}
             </Link>
           </li>
@@ -98,14 +125,14 @@ export default async function InstantePage({ params }: InstantePageProps) {
         {/* Contenido */}
         <div
           className="prose-instante"
-          dangerouslySetInnerHTML={{ __html: instante.contentHtml || '' }}
+          dangerouslySetInnerHTML={{ __html: contentHtml }}
         />
       </article>
 
       {/* Navegación */}
       <nav className="mt-8 flex justify-between">
         <Link
-          href={`/${params.area}`}
+          href={`/${areaId}`}
           className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

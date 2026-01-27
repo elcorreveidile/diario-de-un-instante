@@ -1,10 +1,49 @@
-import { getAreasConUltimoInstante, getEstadisticas } from '@/lib/getInstantes';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { getAreasConUltimoInstante, getEstadisticas, AreaConUltimoInstante } from '@/lib/firestore';
 import AreaCard from '@/components/AreaCard';
 import Stats from '@/components/Stats';
 
-export default async function HomePage() {
-  const areas = await getAreasConUltimoInstante();
-  const stats = await getEstadisticas();
+export default function HomePage() {
+  const [areas, setAreas] = useState<AreaConUltimoInstante[]>([]);
+  const [stats, setStats] = useState({
+    totalInstantes: 0,
+    pensamientos: 0,
+    acciones: 0,
+    areasActivas: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [areasData, statsData] = await Promise.all([
+          getAreasConUltimoInstante(),
+          getEstadisticas(),
+        ]);
+        setAreas(areasData);
+        setStats(statsData);
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container-page">
+        <div className="text-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-500">Cargando tu diario...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-page">
