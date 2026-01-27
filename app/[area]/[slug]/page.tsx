@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getInstanteBySlug, getAreaInfo, Instante } from '@/lib/firestore';
+import { getPublicInstanteBySlug, getAreaInfo, Instante } from '@/lib/firestore';
 import { remark } from 'remark';
 import html from 'remark-html';
 
@@ -25,7 +25,7 @@ export default function InstantePage() {
   useEffect(() => {
     const loadInstante = async () => {
       try {
-        const data = await getInstanteBySlug(areaId, slug);
+        const data = await getPublicInstanteBySlug(areaId, slug);
         if (!data) {
           setNotFoundState(true);
           return;

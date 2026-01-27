@@ -94,6 +94,8 @@ export interface Instante {
   tipo: 'pensamiento' | 'accion';
   slug: string;
   content: string;
+  estado: 'borrador' | 'publicado';
+  privado: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -106,6 +108,8 @@ export interface InstanteInput {
   tipo: 'pensamiento' | 'accion';
   slug: string;
   content: string;
+  estado: 'borrador' | 'publicado';
+  privado: boolean;
 }
 
 // Interfaz para el área con su último instante
@@ -199,6 +203,84 @@ export async function getInstanteBySlug(areaId: string, slug: string): Promise<I
   } as Instante;
 }
 
+// ==================== NUEVAS FUNCIONES V0.2 ====================
+
+// Obtener solo instantes públicos y publicados
+export async function getPublicInstantes(): Promise<Instante[]> {
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where('privado', '==', false),
+    where('estado', '==', 'publicado'),
+    orderBy('fecha', 'desc')
+  );
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Instante[];
+}
+
+// Obtener instantes públicos por área
+export async function getPublicInstantesByArea(areaId: string): Promise<Instante[]> {
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where('area', '==', areaId),
+    where('privado', '==', false),
+    where('estado', '==', 'publicado'),
+    orderBy('fecha', 'desc')
+  );
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Instante[];
+}
+
+// Obtener instante público por slug
+export async function getPublicInstanteBySlug(areaId: string, slug: string): Promise<Instante | null> {
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where('area', '==', areaId),
+    where('slug', '==', slug),
+    where('privado', '==', false),
+    where('estado', '==', 'publicado')
+  );
+
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const doc = snapshot.docs[0];
+  return {
+    id: doc.id,
+    ...doc.data(),
+  } as Instante;
+}
+
+// Filtrar instantes por estado
+export async function getInstantesByEstado(estado: 'borrador' | 'publicado'): Promise<Instante[]> {
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where('estado', '==', estado),
+    orderBy('fecha', 'desc')
+  );
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Instante[];
+}
+
+// ==================== FIN NUEVAS FUNCIONES V0.2 ====================
+
 // Crear nuevo instante
 export async function createInstante(data: InstanteInput): Promise<string> {
   const docRef = await addDoc(collection(db, COLLECTION_NAME), {
@@ -227,7 +309,7 @@ export async function deleteInstante(id: string): Promise<void> {
 
 // Obtener áreas con su último instante
 export async function getAreasConUltimoInstante(): Promise<AreaConUltimoInstante[]> {
-  const allInstantes = await getAllInstantes();
+  const allInstantes = await getPublicInstantes(); // CAMBIO V0.2: Solo públicos publicados
 
   return AREAS.map(area => {
     const instantesDeArea = allInstantes.filter(i => i.area === area.id);
@@ -251,7 +333,7 @@ export function getAreaInfo(areaId: string) {
 
 // Obtener estadísticas
 export async function getEstadisticas() {
-  const allInstantes = await getAllInstantes();
+  const allInstantes = await getPublicInstantes(); // CAMBIO V0.2: Solo públicos publicados
 
   const pensamientos = allInstantes.filter(i => i.tipo === 'pensamiento').length;
   const acciones = allInstantes.filter(i => i.tipo === 'accion').length;
