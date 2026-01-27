@@ -4,7 +4,7 @@ import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
 
-// Definición de las 10 áreas de vida
+// Definición de las áreas de vida
 export const AREAS = [
   { id: 'trabajo', nombre: 'Trabajo', emoji: '💼' },
   { id: 'aprendizaje', nombre: 'Aprendizaje', emoji: '📚' },
@@ -16,6 +16,7 @@ export const AREAS = [
   { id: 'familia', nombre: 'Familia', emoji: '🏠' },
   { id: 'entorno', nombre: 'Entorno', emoji: '🌱' },
   { id: 'finanzas', nombre: 'Finanzas', emoji: '💰' },
+  { id: 'tecnologia', nombre: 'Tecnología', emoji: '💻' },
 ] as const;
 
 export type AreaId = typeof AREAS[number]['id'];
