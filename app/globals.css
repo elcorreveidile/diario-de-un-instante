@@ -165,7 +165,7 @@
 .w-md-editor-text-input,
 .w-md-editor-preview {
   background-color: white !important;
-  color: #1a1a1a;
+  color: #1a1a1a !important;
 }
 
 .dark .w-md-editor {
@@ -176,7 +176,18 @@
 .dark .w-md-editor-text-input,
 .dark .w-md-editor-preview {
   background-color: #1f2937 !important;
-  color: #f9fafb;
+  color: #f9fafb !important;
+}
+
+/* Asegurar que el textarea de entrada tenga el color correcto */
+.w-md-editor-text-input > textarea {
+  color: #1a1a1a !important;
+  background-color: transparent !important;
+}
+
+.dark .w-md-editor-text-input > textarea {
+  color: #f9fafb !important;
+  background-color: transparent !important;
 }
 
 .w-md-editor-toolbar {
