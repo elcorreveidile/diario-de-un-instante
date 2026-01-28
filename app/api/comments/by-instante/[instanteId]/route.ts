@@ -39,13 +39,31 @@ export async function GET(
       );
     }
 
+    console.log('[API Comments] Fetching comments for instante:', instanteId);
+
     // Obtener comentarios usando Admin SDK
-    const snapshot = await adminDb
-      .collection('comments')
-      .where('instanteId', '==', instanteId)
-      .where('status', '==', 'approved')
-      .orderBy('createdAt', 'desc')
-      .get();
+    // Primero intentar con orderBy, si falla por índice, intentar sin orderBy
+    let snapshot;
+    try {
+      snapshot = await adminDb
+        .collection('comments')
+        .where('instanteId', '==', instanteId)
+        .where('status', '==', 'approved')
+        .orderBy('createdAt', 'desc')
+        .get();
+    } catch (indexError: any) {
+      // Si falla por falta de índice, intentar sin orderBy
+      if (indexError.message && indexError.message.includes('index')) {
+        console.log('[API Comments] No index found, fetching without orderBy');
+        snapshot = await adminDb
+          .collection('comments')
+          .where('instanteId', '==', instanteId)
+          .where('status', '==', 'approved')
+          .get();
+      } else {
+        throw indexError;
+      }
+    }
 
     const allComments = snapshot.docs.map(doc => {
       const data = doc.data();
@@ -58,6 +76,15 @@ export async function GET(
         deletedAt: data.deletedAt?.toDate?.() || data.deletedAt,
       };
     }).filter((comment: any) => !comment.deletedAt);
+
+    // Ordenar manualmente si no se pudo usar orderBy
+    allComments.sort((a: any, b: any) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
+
+    console.log('[API Comments] Found comments:', allComments.length);
 
     // Construir árbol de comentarios
     const threadedComments = buildThreadedComments(allComments);
@@ -72,8 +99,10 @@ export async function GET(
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Error al obtener comentarios',
+        comments: [],
+        count: 0,
       },
-      { status: 500 }
+      { status: 200 } // Retornar 200 con array vacío en lugar de 500 para no romper el frontend
     );
   }
 }
