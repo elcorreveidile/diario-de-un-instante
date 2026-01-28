@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getBlogConfig, getUserByUsername, getPublicInstantesByUser } from '@/lib/firestore';
+import { getBlogConfig, getUserByUsername, getPublicInstantesByUser } from '@/lib/firestore-server';
 import InstanteCard from '@/components/InstanteCard';
 
 // Forzar renderizado dinámico - NO generar páginas estáticas
