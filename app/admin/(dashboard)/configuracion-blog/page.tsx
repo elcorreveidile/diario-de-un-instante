@@ -25,26 +25,26 @@ export default function ConfigurarBlogPage() {
   const [previewHeader, setPreviewHeader] = useState('');
 
   useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const data = await getBlogConfig(user!.uid);
+        if (data) {
+          setConfig(data);
+          setPreviewAvatar(data.photoURL || '');
+          setPreviewHeader(data.headerPhotoURL || '');
+        }
+      } catch (error) {
+        console.error('Error cargando configuración:', error);
+        setMessage('Error al cargar configuración');
+      } finally {
+        setLoadingConfig(false);
+      }
+    };
+
     if (user) {
       loadConfig();
     }
   }, [user]);
-
-  const loadConfig = async () => {
-    try {
-      const data = await getBlogConfig(user!.uid);
-      if (data) {
-        setConfig(data);
-        setPreviewAvatar(data.photoURL || '');
-        setPreviewHeader(data.headerPhotoURL || '');
-      }
-    } catch (error) {
-      console.error('Error cargando configuración:', error);
-      setMessage('Error al cargar configuración');
-    } finally {
-      setLoadingConfig(false);
-    }
-  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -261,7 +261,7 @@ export default function ConfigurarBlogPage() {
               placeholder="María García"
             />
             <p className="mt-1 text-xs text-gray-500">
-              Aparecerá como: "Diario de un Instante de <strong>{config.displayName}</strong>"
+              Aparecerá como: &quot;Diario de un Instante de <strong>{config.displayName}</strong>&quot;
             </p>
           </div>
 
