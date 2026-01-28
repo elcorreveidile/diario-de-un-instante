@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { confirmSubscription } from '@/lib/newsletter';
-import { sendWelcomeEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +22,7 @@ export default async function ConfirmPage({ searchParams }: ConfirmPageProps) {
   // Enviar email de bienvenida si la confirmación fue exitosa
   if (result.success && result.email) {
     try {
+      const { sendWelcomeEmail } = await import('@/lib/email');
       await sendWelcomeEmail(result.email);
     } catch (error) {
       console.error('[Newsletter] Error enviando welcome:', error);
