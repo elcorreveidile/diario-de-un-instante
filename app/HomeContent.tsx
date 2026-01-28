@@ -6,6 +6,7 @@ import { getGlobalAreasConUltimoInstante, getGlobalEstadisticas, AreaConUltimoIn
 import AreaCard from '@/components/AreaCard';
 import Stats from '@/components/Stats';
 import { createInvitationRequest } from '@/lib/invites';
+import { subscribeToNewsletter } from '@/lib/newsletter';
 
 export default function HomeContent() {
   const [areas, setAreas] = useState<AreaConUltimoInstante[]>([]);
@@ -26,6 +27,13 @@ export default function HomeContent() {
   const [submittingInvite, setSubmittingInvite] = useState(false);
   const [inviteSuccess, setInviteSuccess] = useState(false);
   const [inviteError, setInviteError] = useState('');
+
+  // Estados para newsletter
+  const [showNewsletterForm, setShowNewsletterForm] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [submittingNewsletter, setSubmittingNewsletter] = useState(false);
+  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+  const [newsletterError, setNewsletterError] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -68,6 +76,33 @@ export default function HomeContent() {
       setInviteError(error.message || 'Error al enviar la solicitud. Inténtalo de nuevo.');
     } finally {
       setSubmittingInvite(false);
+    }
+  };
+
+  const handleNewsletterSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!newsletterEmail.trim()) {
+      setNewsletterError('Por favor ingresa tu email');
+      return;
+    }
+
+    setSubmittingNewsletter(true);
+    setNewsletterError('');
+
+    try {
+      const result = await subscribeToNewsletter(newsletterEmail);
+      if (result.success) {
+        setNewsletterSuccess(true);
+        setNewsletterEmail('');
+      } else {
+        setNewsletterError(result.message);
+      }
+    } catch (error: any) {
+      console.error('Error suscribiendo newsletter:', error);
+      setNewsletterError('Error al suscribirse. Inténtalo de nuevo.');
+    } finally {
+      setSubmittingNewsletter(false);
     }
   };
 
@@ -245,6 +280,103 @@ export default function HomeContent() {
           areasActivas={stats.areasActivas}
           totalAreas={stats.totalAreas}
         />
+      </section>
+
+      {/* Newsletter */}
+      <section className="mb-12">
+        <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl border border-violet-200 dark:border-violet-800 p-8 sm:p-10">
+          <div className="text-center max-w-2xl mx-auto">
+            {!showNewsletterForm ? (
+              <>
+                <div className="text-4xl mb-4">📧</div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                  Newsletter
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Recibe los mejores instantes directamente en tu email. Sin spam, solo contenido valioso cuando haya novedades interesantes.
+                </p>
+                <button
+                  onClick={() => setShowNewsletterForm(true)}
+                  className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-lg transition-colors text-sm font-medium"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Suscribirse
+                </button>
+              </>
+            ) : (
+              <>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Suscríbete a la Newsletter
+                </h3>
+
+                {newsletterSuccess ? (
+                  <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
+                    <p className="text-emerald-800 dark:text-emerald-200 font-medium mb-2">
+                      ¡Solicitud enviada! 🎉
+                    </p>
+                    <p className="text-emerald-700 dark:text-emerald-300 text-sm">
+                      Te hemos enviado un email para confirmar tu suscripción. Por favor revisa tu bandeja de entrada.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setShowNewsletterForm(false);
+                        setNewsletterSuccess(false);
+                      }}
+                      className="mt-4 text-sm text-emerald-700 dark:text-emerald-300 hover:underline"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleNewsletterSubmit} className="space-y-4">
+                    {newsletterError && (
+                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                        <p className="text-red-800 dark:text-red-200 text-sm">{newsletterError}</p>
+                      </div>
+                    )}
+
+                    <div>
+                      <label htmlFor="newsletterEmail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Email *
+                      </label>
+                      <input
+                        id="newsletterEmail"
+                        type="email"
+                        value={newsletterEmail}
+                        onChange={(e) => setNewsletterEmail(e.target.value)}
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                        placeholder="tu@email.com"
+                      />
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        type="submit"
+                        disabled={submittingNewsletter}
+                        className="flex-1 bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium disabled:cursor-not-allowed"
+                      >
+                        {submittingNewsletter ? 'Enviando...' : 'Suscribirse'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowNewsletterForm(false);
+                          setNewsletterError('');
+                        }}
+                        className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </>
+            )}
+          </div>
+        </div>
       </section>
 
       {/* Grid de Áreas */}
