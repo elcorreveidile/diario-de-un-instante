@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import InstanteCard from '@/components/InstanteCard';
 
@@ -12,16 +12,19 @@ interface PageProps {
   };
 }
 
+// Helper para obtener la URL base
+function getBaseUrl() {
+  const headersList = headers();
+  const host = headersList.get('host') || 'localhost:3000';
+  const protocol = host.includes('localhost') ? 'http' : 'https';
+  return `${protocol}://${host}`;
+}
+
 // Generar metadata dinámica
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
-    const host = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_VERCEL_URL
-      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      : 'http://localhost:3000';
-
-    const res = await fetch(`${host}/api/user/${params.username}`, {
+    const baseUrl = getBaseUrl();
+    const res = await fetch(`${baseUrl}/api/user/${params.username}`, {
       cache: 'no-store',
     });
 
@@ -45,14 +48,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function UserProfilePage({ params }: PageProps) {
-  const host = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-    : 'http://localhost:3000';
+  const baseUrl = getBaseUrl();
 
   // Obtener datos del usuario
-  const userRes = await fetch(`${host}/api/user/${params.username}`, {
+  const userRes = await fetch(`${baseUrl}/api/user/${params.username}`, {
     cache: 'no-store',
   });
 
@@ -78,7 +77,7 @@ export default async function UserProfilePage({ params }: PageProps) {
   const user = await userRes.json();
 
   // Obtener instantes del usuario
-  const instantesRes = await fetch(`${host}/api/user/${params.username}/instantes`, {
+  const instantesRes = await fetch(`${baseUrl}/api/user/${params.username}/instantes`, {
     cache: 'no-store',
   });
   const instantes = instantesRes.ok ? await instantesRes.json() : [];
