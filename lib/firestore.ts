@@ -517,6 +517,27 @@ export async function getUserByUsername(username: string): Promise<Usuario | nul
 
 // ==================== FIN NUEVAS FUNCIONES v0.5.2 ====================
 
+// ==================== FUNCIONES GLOBAL (ALIASES PARA COMPATIBILIDAD) ====================
+// Estas funciones son aliases para mantener compatibilidad con código existente
+
+export async function getGlobalPublicInstantesByArea(areaId: string): Promise<Instante[]> {
+  return await getPublicInstantesByArea(areaId);
+}
+
+export async function getGlobalPublicInstantes(): Promise<Instante[]> {
+  return await getPublicInstantes();
+}
+
+export async function getGlobalAreasConUltimoInstante(): Promise<AreaConUltimoInstante[]> {
+  return await getAreasConUltimoInstante();
+}
+
+export async function getGlobalEstadisticas() {
+  return await getEstadisticas();
+}
+
+// ==================== FIN FUNCIONES GLOBAL ====================
+
 // Obtener todos los instantes de un usuario
 export async function getInstantesByUser(userId: string): Promise<Instante[]> {
   const q = query(
