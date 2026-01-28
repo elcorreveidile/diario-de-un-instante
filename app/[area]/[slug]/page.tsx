@@ -26,6 +26,11 @@ export default function InstantePage() {
 
   const areaInfo = getAreaInfo(areaId);
 
+  // Log temprano para verificar autenticación
+  console.log('[InstantePage] Componente montado');
+  console.log('[InstantePage] User auth:', user ? { uid: user.uid, email: user.email } : null);
+  console.log('[InstantePage] Buscando:', { areaId, slug });
+
   useEffect(() => {
     const loadInstante = async () => {
       try {
