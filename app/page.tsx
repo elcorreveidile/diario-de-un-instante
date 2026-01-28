@@ -32,9 +32,6 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [ogImageUrl],
     },
-    other: {
-      'fb:app_id': '708534115647880',
-    },
   };
 }
 

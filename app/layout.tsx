@@ -38,6 +38,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+      <head>
+        <meta property="fb:app_id" content="708534115647880" />
+      </head>
       <body className="flex flex-col min-h-screen">
         <Providers>
           <GlobalHotkeys />
