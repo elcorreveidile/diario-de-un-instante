@@ -18,12 +18,36 @@ export default async function DebugUsersPage() {
     cache: 'no-store',
   });
 
-  const users = res.ok ? await res.json() : [];
+  let users: any[] = [];
+  let error: string | null = null;
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ error: 'Error desconocido' }));
+    error = errorData.error || 'Error al cargar usuarios';
+    console.error('[DebugUsers] Error al cargar usuarios:', errorData);
+  } else {
+    users = await res.json();
+    console.log('[DebugUsers] Usuarios cargados:', users.length);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Debug: Usuarios en Firestore</h1>
+
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <h2 className="text-lg font-semibold text-red-900 mb-2">Error</h2>
+            <p className="text-sm text-red-800">{error}</p>
+            <p className="text-xs text-red-600 mt-2">URL: {baseUrl}/api/debug/users</p>
+          </div>
+        )}
+
+        {!error && users.length === 0 && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p className="text-sm text-yellow-800">No hay usuarios en la base de datos o la API no devolvió datos.</p>
+          </div>
+        )}
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
