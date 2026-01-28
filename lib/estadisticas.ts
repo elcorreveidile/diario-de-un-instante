@@ -353,5 +353,15 @@ function formatMes(año: number, mes: number): string {
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
+
+  // Manejar meses fuera de rango (ej: -1 para diciembre del año anterior)
+  if (mes < 0) {
+    mes = 11; // Diciembre
+    año--;
+  } else if (mes > 11) {
+    mes = 0; // Enero
+    año++;
+  }
+
   return `${nombres[mes]} ${año}`;
 }

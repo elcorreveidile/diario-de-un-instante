@@ -209,19 +209,23 @@ export async function getInstanteBySlug(areaId: string, slug: string): Promise<I
 
 // Obtener solo instantes públicos y publicados
 export async function getPublicInstantes(): Promise<Instante[]> {
+  // Obtenemos todos los instantes ordenados por fecha
   const q = query(
     collection(db, COLLECTION_NAME),
-    where('privado', '==', false),
-    where('estado', '==', 'publicado'),
     orderBy('fecha', 'desc')
   );
 
   const snapshot = await getDocs(q);
 
+  // Filtramos en el cliente para incluir aquellos que no tienen el campo 'privado'
   return snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data(),
-  })) as Instante[];
+  })).filter((instante: any) => {
+    const esPublico = instante.privado === false || !instante.hasOwnProperty('privado');
+    const esPublicado = instante.estado === 'publicado' || !instante.hasOwnProperty('estado');
+    return esPublico && esPublicado;
+  }) as Instante[];
 }
 
 // Obtener instantes públicos por área
@@ -229,17 +233,20 @@ export async function getPublicInstantesByArea(areaId: string): Promise<Instante
   const q = query(
     collection(db, COLLECTION_NAME),
     where('area', '==', areaId),
-    where('privado', '==', false),
-    where('estado', '==', 'publicado'),
     orderBy('fecha', 'desc')
   );
 
   const snapshot = await getDocs(q);
 
+  // Filtramos en el cliente para incluir aquellos que no tienen el campo 'privado'
   return snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data(),
-  })) as Instante[];
+  })).filter((instante: any) => {
+    const esPublico = instante.privado === false || !instante.hasOwnProperty('privado');
+    const esPublicado = instante.estado === 'publicado' || !instante.hasOwnProperty('estado');
+    return esPublico && esPublicado;
+  }) as Instante[];
 }
 
 // Obtener instante público por slug

@@ -32,7 +32,7 @@ export default function InstanteCard({
         <div className="flex items-center justify-between mb-3">
           <time
             dateTime={instante.fecha}
-            className="text-xs text-gray-500 dark:text-gray-400 font-medium"
+            className="text-xs text-gray-700 dark:text-gray-400 font-medium"
           >
             {format(new Date(instante.fecha), "EEEE, d 'de' MMMM yyyy", { locale: es })}
           </time>
@@ -48,22 +48,22 @@ export default function InstanteCard({
 
         {/* Título */}
         <h3
-          className="font-medium mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity"
+          className="font-semibold mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity"
           style={{ color: primaryColor }}
         >
           {instante.titulo}
         </h3>
 
         {/* Preview del contenido */}
-        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+        <p className="text-sm text-gray-800 dark:text-gray-400 line-clamp-2 mb-3">
           {instante.content.replace(/[#*`\[\]]/g, '').substring(0, 150)}...
         </p>
 
         {/* Footer con área (si se muestra) */}
         {showArea && areaInfo && (
-          <div className="flex items-center gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2 pt-3 border-t border-gray-300 dark:border-gray-700">
             <span className="text-sm">{areaInfo.emoji}</span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">{areaInfo.nombre}</span>
+            <span className="text-xs text-gray-700 dark:text-gray-400 font-medium">{areaInfo.nombre}</span>
           </div>
         )}
       </article>

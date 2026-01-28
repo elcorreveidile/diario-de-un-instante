@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getAllInstantes } from '@/lib/firestore';
+import { getInstantesByUser } from '@/lib/firestore';
+import { useAuth } from '@/lib/auth';
 import {
   calcularEstadisticasCompletas,
   EstadisticasCompletas,
@@ -24,6 +25,7 @@ import {
 } from 'recharts';
 
 export default function EstadisticasPage() {
+  const { user } = useAuth();
   const [estadisticas, setEstadisticas] = useState<EstadisticasCompletas | null>(
     null
   );
@@ -31,9 +33,11 @@ export default function EstadisticasPage() {
 
   useEffect(() => {
     const loadEstadisticas = async () => {
+      if (!user?.uid) return;
+
       try {
-        const instantes = await getAllInstantes();
-        const stats = await calcularEstadisticasCompletas(instantes, true); // true = incluir privados en admin
+        const instantes = await getInstantesByUser(user.uid);
+        const stats = await calcularEstadisticasCompletas(instantes, true); // true = incluir privados
         setEstadisticas(stats);
       } catch (error) {
         console.error('Error cargando estadísticas:', error);
@@ -43,7 +47,7 @@ export default function EstadisticasPage() {
     };
 
     loadEstadisticas();
-  }, []);
+  }, [user]);
 
   if (loading) {
     return (
