@@ -30,6 +30,16 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'es_ES',
   },
+  alternates: {
+    types: {
+      'application/rss+xml': [
+        {
+          title: 'RSS Global',
+          url: 'https://www.diariodeuninstante.com/rss',
+        },
+      ],
+    },
+  },
 };
 
 export default function RootLayout({
