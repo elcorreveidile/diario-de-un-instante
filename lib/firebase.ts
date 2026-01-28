@@ -1,6 +1,6 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getAuth, GoogleAuthProvider, OAuthProvider, EmailAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -12,8 +12,32 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Inicializar Firebase solo si no hay apps ya inicializadas
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Inicializar Firebase
+function initializeAppIfNecessary() {
+  // Verificar que todas las variables necesarias estén configuradas
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+    console.error('[Firebase] Variables de entorno no configuradas:', {
+      hasApiKey: !!firebaseConfig.apiKey,
+      hasProjectId: !!firebaseConfig.projectId,
+      hasAuthDomain: !!firebaseConfig.authDomain,
+    });
+    throw new Error('Firebase: Variables de entorno no configuradas');
+  }
+
+  if (getApps().length === 0) {
+    console.log('[Firebase] Inicializando app con config:', {
+      projectId: firebaseConfig.projectId,
+      authDomain: firebaseConfig.authDomain,
+    });
+    return initializeApp(firebaseConfig);
+  }
+
+  console.log('[Firebase] Reutilizando app existente');
+  return getApps()[0];
+}
+
+// Inicializar la app
+const app = initializeAppIfNecessary();
 
 // Configurar Auth
 const authInstance = getAuth(app);
