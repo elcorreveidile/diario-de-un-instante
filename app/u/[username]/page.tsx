@@ -15,7 +15,13 @@ interface PageProps {
 // Generar metadata dinámica
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/user/${params.username}`, {
+    const host = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_VERCEL_URL
+      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+      : 'http://localhost:3000';
+
+    const res = await fetch(`${host}/api/user/${params.username}`, {
       cache: 'no-store',
     });
 
@@ -39,10 +45,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function UserProfilePage({ params }: PageProps) {
-  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000';
+  const host = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NEXT_PUBLIC_VERCEL_URL
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+    : 'http://localhost:3000';
 
   // Obtener datos del usuario
-  const userRes = await fetch(`${baseUrl}/api/user/${params.username}`, {
+  const userRes = await fetch(`${host}/api/user/${params.username}`, {
     cache: 'no-store',
   });
 
@@ -68,7 +78,7 @@ export default async function UserProfilePage({ params }: PageProps) {
   const user = await userRes.json();
 
   // Obtener instantes del usuario
-  const instantesRes = await fetch(`${baseUrl}/api/user/${params.username}/instantes`, {
+  const instantesRes = await fetch(`${host}/api/user/${params.username}/instantes`, {
     cache: 'no-store',
   });
   const instantes = instantesRes.ok ? await instantesRes.json() : [];
