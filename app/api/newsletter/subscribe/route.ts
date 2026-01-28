@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendConfirmationEmail } from '@/lib/email';
+import { adminDb } from '@/lib/firebase-admin';
 
 const NEWSLETTER_COLLECTION = 'newsletter';
 
@@ -20,13 +20,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar si ya existe en Firestore
-    const { getFirestore } = await import('firebase/firestore');
-    const { collection, query, where, getDocs, updateDoc, doc, addDoc } = await import('firebase/firestore');
-    const { db } = await import('@/lib/firebase');
-
-    const q = query(collection(db, NEWSLETTER_COLLECTION), where('email', '==', email));
-    const snapshot = await getDocs(q);
+    // Verificar si ya existe en Firestore usando Admin SDK
+    const snapshot = await adminDb
+      .collection(NEWSLETTER_COLLECTION)
+      .where('email', '==', email)
+      .get();
 
     let confirmationToken: string;
 
@@ -46,7 +44,7 @@ export async function POST(request: NextRequest) {
       if (existingData.status === 'unsubscribed') {
         confirmationToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-        await updateDoc(existingDoc.ref, {
+        await existingDoc.ref.update({
           status: 'pending',
           confirmationToken,
           subscribedAt: new Date(),
@@ -54,8 +52,14 @@ export async function POST(request: NextRequest) {
           unsubscribedAt: null,
         });
 
-        // Enviar email de confirmación
-        await sendConfirmationEmail(email, confirmationToken);
+        // Enviar email de confirmación (no fallar si error)
+        try {
+          const { sendConfirmationEmail } = await import('@/lib/email');
+          await sendConfirmationEmail(email, confirmationToken);
+        } catch (emailError) {
+          console.error('[API] Error enviando email de confirmación:', emailError);
+          // Continuar aunque falle el email
+        }
 
         return NextResponse.json({
           success: true,
@@ -68,7 +72,7 @@ export async function POST(request: NextRequest) {
     const unsubscribeToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     confirmationToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-    await addDoc(collection(db, NEWSLETTER_COLLECTION), {
+    await adminDb.collection(NEWSLETTER_COLLECTION).add({
       email,
       status: 'pending',
       confirmationToken,
@@ -76,8 +80,14 @@ export async function POST(request: NextRequest) {
       subscribedAt: new Date(),
     });
 
-    // Enviar email de confirmación
-    await sendConfirmationEmail(email, confirmationToken);
+    // Enviar email de confirmación (no fallar si error)
+    try {
+      const { sendConfirmationEmail } = await import('@/lib/email');
+      await sendConfirmationEmail(email, confirmationToken);
+    } catch (emailError) {
+      console.error('[API] Error enviando email de confirmación:', emailError);
+      // No fallar la suscripción si falla el email
+    }
 
     return NextResponse.json({
       success: true,
@@ -86,7 +96,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[API] Error suscribiendo:', error);
     return NextResponse.json(
-      { success: false, message: 'Error al suscribirse. Por favor inténtalo de nuevo.' },
+      {
+        success: false,
+        message: error instanceof Error ? error.message : 'Error al suscribirse. Por favor inténtalo de nuevo.'
+      },
       { status: 500 }
     );
   }
