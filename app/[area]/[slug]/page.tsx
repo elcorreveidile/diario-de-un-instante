@@ -43,9 +43,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     } as any;
 
     const areaInfo = getAreaInfo(area);
-    // Cache-busting: añadir timestamp para evitar caché de Facebook
-    const timestamp = Date.now();
-    const ogImageUrl = `${baseUrl}/api/og/instante/${doc.id}?t=${timestamp}`;
+    // Cache-busting: versión estática para evitar caché de Facebook
+    const ogImageUrl = `${baseUrl}/api/og/instante/${doc.id}?v=2`;
     const title = instante.titulo;
     const description = instante.content
       .replace(/[#*`\[\]]/g, '')
