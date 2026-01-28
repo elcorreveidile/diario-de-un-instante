@@ -75,6 +75,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description,
         images: [ogImageUrl],
       },
+      other: {
+        'fb:app_id': '708534115647880',
+      },
     };
   } catch (error) {
     console.error('[generateMetadata] Error:', error);
