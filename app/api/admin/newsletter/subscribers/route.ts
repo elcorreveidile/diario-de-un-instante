@@ -14,7 +14,18 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.split('Bearer ')[1];
-    await adminAuth.verifyIdToken(token);
+    const decoded = await adminAuth.verifyIdToken(token);
+
+    // Verificar que es admin
+    const userDoc = await adminDb.collection('users').doc(decoded.uid).get();
+    const userData = userDoc.data();
+
+    if (!userDoc.exists || userData?.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Acceso denegado. Solo administradores pueden ver suscriptores.' },
+        { status: 403 }
+      );
+    }
 
     // Obtener suscriptores activos usando Admin SDK
     const snapshot = await adminDb
