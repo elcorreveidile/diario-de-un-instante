@@ -23,7 +23,7 @@ export default function InstanteCard({
   return (
     <Link href={`/${instante.area}/${instante.slug}`}>
       <article
-        className="group rounded-lg p-5 hover:shadow-sm transition-all duration-200 border border-gray-100 dark:border-gray-800"
+        className="group rounded-lg p-5 hover:shadow-sm transition-all duration-200 border border-gray-100 dark:border-gray-800 dark:!bg-gray-800"
         style={{
           backgroundColor: secondaryColor,
         }}
