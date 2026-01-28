@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase-admin/firestore';
+import { adminDb } from '@/lib/firebase-admin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { username } = params;
     console.log('[API] Obteniendo usuario:', username);
 
-    const usersRef = collection(db, 'users');
+    const usersRef = collection(adminDb, 'users');
     const usernameLower = username.toLowerCase();
 
     // Buscar por campo username

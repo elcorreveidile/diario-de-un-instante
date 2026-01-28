@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { collection, getDocs } from 'firebase-admin/firestore';
+import { adminDb } from '@/lib/firebase-admin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -8,10 +8,10 @@ export const dynamic = 'force-dynamic';
 // GET /api/debug/users - Obtiene todos los usuarios (solo para debug)
 export async function GET() {
   try {
-    console.log('[API Debug] Iniciando petición');
-    console.log('[API Debug] db inicializado:', !!db);
+    console.log('[API Debug] Iniciando petición con Firebase Admin SDK');
+    console.log('[API Debug] adminDb inicializado:', !!adminDb);
 
-    const usersRef = collection(db, 'users');
+    const usersRef = collection(adminDb, 'users');
     console.log('[API Debug] Referencia a colección creada');
 
     const snapshot = await getDocs(usersRef);
@@ -23,7 +23,7 @@ export async function GET() {
     }));
 
     console.log('[API Debug] Usuarios mapeados:', users.length);
-    console.log('[API Debug] Primer usuario (si existe):', users[0] ? JSON.stringify(users[0]) : 'N/A');
+    console.log('[API Debug] Primer usuario (si existe):', users[0]?.email || 'N/A');
 
     return NextResponse.json(users);
 

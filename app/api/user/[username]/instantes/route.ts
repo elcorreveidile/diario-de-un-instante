@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase-admin/firestore';
+import { adminDb } from '@/lib/firebase-admin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     console.log('[API] Obteniendo instantes de:', username);
 
     // Primero obtener el UID del usuario
-    const usersRef = collection(db, 'users');
+    const usersRef = collection(adminDb, 'users');
     const usernameLower = username.toLowerCase();
 
     const qByUsername = query(usersRef, where('username', '==', usernameLower));
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Obtener instantes públicos del usuario
-    const instantesRef = collection(db, 'instantes');
+    const instantesRef = collection(adminDb, 'instantes');
     const q = query(instantesRef, where('userId', '==', userUid));
     const snapshot = await getDocs(q);
 
