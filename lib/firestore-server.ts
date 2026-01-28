@@ -1,12 +1,17 @@
 // Funciones server-side que usan Firebase Admin SDK
 // Este archivo SOLO debe importarse en server components
 
-import { collection, doc, getDocs, getDoc, query, where } from 'firebase/firestore';
-import { getAdminDb } from './firebase-admin';
+// NO hacer imports estáticos de firebase-admin aquí
+// Los imports se hacen dinámicamente dentro de las funciones
 
 // Obtener usuario por username (campo username o displayName para compatibilidad)
 export async function getUserByUsername(username: string): Promise<any> {
   console.log('[Server] getUserByUsername:', username);
+
+  // Import dinámico solo en servidor
+  const { collection, query, where, getDocs } = await import('firebase/firestore');
+  const { getAdminDb } = await import('./firebase-admin');
+
   const db = await getAdminDb();
   const usersRef = collection(db, 'users');
   const usernameLower = username.toLowerCase();
@@ -59,6 +64,9 @@ export async function getUserByUsername(username: string): Promise<any> {
 
 // Obtener configuración del blog de un usuario
 export async function getBlogConfig(userId: string): Promise<any> {
+  const { doc, getDoc } = await import('firebase/firestore');
+  const { getAdminDb } = await import('./firebase-admin');
+
   const db = await getAdminDb();
   const userDoc = await getDoc(doc(db, 'users', userId));
 
@@ -80,6 +88,9 @@ export async function getBlogConfig(userId: string): Promise<any> {
 
 // Obtener instantes públicos de un usuario
 export async function getPublicInstantesByUser(userId: string): Promise<any[]> {
+  const { collection, query, where, getDocs } = await import('firebase/firestore');
+  const { getAdminDb } = await import('./firebase-admin');
+
   const db = await getAdminDb();
   const instantesRef = collection(db, 'instantes');
   const q = query(instantesRef, where('userId', '==', userId));
