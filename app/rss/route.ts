@@ -5,18 +5,31 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Obtener los últimos 20 instantes públicos
+    console.log('[RSS] Generando feed global');
+
+    // Obtener instantes y filtrar por públicos
     const snapshot = await adminDb
       .collection('instantes')
-      .where('privado', '==', false)
       .orderBy('fecha', 'desc')
-      .limit(20)
+      .limit(50)
       .get();
+
+    console.log('[RSS] Total instantes obtenidos:', snapshot.size);
+
+    // Filtrar solo los públicos
+    const publicInstantes = snapshot.docs.filter((doc) => {
+      const data = doc.data();
+      const esPublico = data.privado === false || !data.hasOwnProperty('privado');
+      const esPublicado = data.estado === 'publicado' || !data.hasOwnProperty('estado');
+      return esPublico && esPublicado;
+    }).slice(0, 20);
+
+    console.log('[RSS] Instantes públicos:', publicInstantes.length);
 
     const baseUrl = 'https://www.diariodeuninstante.com';
 
     // Generar RSS XML
-    const items = snapshot.docs.map((doc) => {
+    const items = publicInstantes.map((doc) => {
       const instante = doc.data();
       const pubDate = new Date(instante.fecha).toUTCString();
 

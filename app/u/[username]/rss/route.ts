@@ -34,17 +34,24 @@ export async function GET(request: Request, { params }: RouteParams) {
     const userData = userDoc.data();
     const userId = userDoc.id;
 
-    // Obtener instantes públicos del usuario
+    // Obtener instantes del usuario
     const instantesSnapshot = await adminDb
       .collection('instantes')
       .where('userId', '==', userId)
-      .where('privado', '==', false)
       .orderBy('fecha', 'desc')
-      .limit(20)
+      .limit(50)
       .get();
 
+    // Filtrar solo los públicos
+    const publicInstantes = instantesSnapshot.docs.filter((doc) => {
+      const data = doc.data();
+      const esPublico = data.privado === false || !data.hasOwnProperty('privado');
+      const esPublicado = data.estado === 'publicado' || !data.hasOwnProperty('estado');
+      return esPublico && esPublicado;
+    }).slice(0, 20);
+
     // Generar RSS XML
-    const items = instantesSnapshot.docs.map((doc) => {
+    const items = publicInstantes.map((doc) => {
       const instante = doc.data();
       const areaInfo = getAreaInfo(instante.area);
       const pubDate = new Date(instante.fecha).toUTCString();
