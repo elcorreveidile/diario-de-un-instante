@@ -72,6 +72,12 @@ export default function AdminLayout({
                 >
                   Newsletters
                 </Link>
+                <Link
+                  href="/admin/comments"
+                  className="text-gray-600 hover:text-gray-900 text-sm"
+                >
+                  Comentarios
+                </Link>
                 {isAdmin && (
                   <>
                     <Link
@@ -189,6 +195,13 @@ export default function AdminLayout({
                 className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
               >
                 Newsletters
+              </Link>
+              <Link
+                href="/admin/comments"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
+              >
+                Comentarios
               </Link>
               {isAdmin && (
                 <>

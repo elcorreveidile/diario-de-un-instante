@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/auth';
 import { remark } from 'remark';
 import html from 'remark-html';
 import { useHotkeys } from 'react-hotkeys-hook';
+import CommentList from '@/components/comments/CommentList';
 
 interface InstanteContentProps {
   areaId: string;
@@ -349,6 +350,13 @@ export default function InstanteContent({ areaId, slug }: InstanteContentProps) 
             dangerouslySetInnerHTML={{ __html: contentHtml }}
           />
         </article>
+
+        {/* Sección de comentarios */}
+        {!zenMode && instante.id && (
+          <div className="mt-8 max-w-3xl">
+            <CommentList instanteId={instante.id} instantOwnerId={instante.userId} />
+          </div>
+        )}
       </div>
 
       {/* Botón flotante para modo zen - FUERA del container */}

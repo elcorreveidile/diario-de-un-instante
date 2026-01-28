@@ -776,3 +776,206 @@ export async function getMostLikedInstantes(limit: number = 10): Promise<Instant
 }
 
 // ==================== FIN NUEVAS FUNCIONES v0.5 ====================
+
+// ==================== v0.6 - COMENTARIOS ====================
+
+const COMMENTS_COLLECTION = 'comments';
+
+// Interfaz para un comentario
+export interface Comment {
+  id?: string;
+  instanteId: string;
+  userId: string;
+  userName: string;
+  userPhoto?: string;
+  content: string;
+  parentId?: string | null;
+  status: 'pending' | 'approved' | 'rejected' | 'spam';
+  createdAt: Date;
+  updatedAt?: Date;
+  editedAt?: Date;
+  deletedAt?: Date;
+}
+
+// Interfaz para crear un comentario
+export interface CommentInput {
+  instanteId: string;
+  userId: string;
+  userName: string;
+  userPhoto?: string;
+  content: string;
+  parentId?: string | null;
+}
+
+// Interfaz para comentario con respuestas anidadas
+export interface CommentWithReplies extends Comment {
+  replies?: CommentWithReplies[];
+}
+
+// Crear un nuevo comentario
+export async function createComment(data: CommentInput): Promise<string> {
+  const docRef = await addDoc(collection(db, COMMENTS_COLLECTION), {
+    ...data,
+    status: 'approved', // Auto-aprobar por ahora
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  });
+
+  return docRef.id;
+}
+
+// Obtener comentarios de un instante (aprobados y no borrados)
+export async function getCommentsByInstante(instanteId: string): Promise<Comment[]> {
+  const q = query(
+    collection(db, COMMENTS_COLLECTION),
+    where('instanteId', '==', instanteId),
+    where('status', '==', 'approved'),
+    orderBy('createdAt', 'desc')
+  );
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs
+    .map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.() || data.createdAt,
+        updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+        editedAt: data.editedAt?.toDate?.() || data.editedAt,
+        deletedAt: data.deletedAt?.toDate?.() || data.deletedAt,
+      };
+    })
+    .filter((comment: any) => !comment.deletedAt) as Comment[];
+}
+
+// Construir árbol de comentarios con respuestas anidadas
+export async function getThreadedComments(instanteId: string): Promise<CommentWithReplies[]> {
+  const allComments = await getCommentsByInstante(instanteId);
+
+  // Separar comentarios raíz de respuestas
+  const rootComments = allComments.filter(c => !c.parentId);
+  const replies = allComments.filter(c => c.parentId);
+
+  // Función recursiva para añadir respuestas
+  function addReplies(parentId: string): CommentWithReplies[] {
+    const directReplies = replies
+      .filter(r => r.parentId === parentId)
+      .map(r => ({
+        ...r,
+        replies: addReplies(r.id!),
+      }));
+
+    return directReplies;
+  }
+
+  // Constrir árbol
+  return rootComments.map(comment => ({
+    ...comment,
+    replies: addReplies(comment.id!),
+  }));
+}
+
+// Obtener un comentario por ID
+export async function getCommentById(commentId: string): Promise<Comment | null> {
+  const docRef = doc(db, COMMENTS_COLLECTION, commentId);
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) {
+    return null;
+  }
+
+  const data = docSnap.data();
+  return {
+    id: docSnap.id,
+    ...data,
+    createdAt: data.createdAt?.toDate?.() || data.createdAt,
+    updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+    editedAt: data.editedAt?.toDate?.() || data.editedAt,
+    deletedAt: data.deletedAt?.toDate?.() || data.deletedAt,
+  } as Comment;
+}
+
+// Actualizar un comentario
+export async function updateComment(commentId: string, content: string): Promise<void> {
+  const docRef = doc(db, COMMENTS_COLLECTION, commentId);
+  await updateDoc(docRef, {
+    content,
+    editedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  });
+}
+
+// Soft delete de un comentario
+export async function deleteComment(commentId: string, userId: string): Promise<void> {
+  const comment = await getCommentById(commentId);
+
+  if (!comment) {
+    throw new Error('El comentario no existe');
+  }
+
+  if (comment.userId !== userId) {
+    throw new Error('No tienes permiso para eliminar este comentario');
+  }
+
+  const docRef = doc(db, COMMENTS_COLLECTION, commentId);
+  await updateDoc(docRef, {
+    deletedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  });
+}
+
+// Moderar un comentario (cambiar estado)
+export async function moderateComment(
+  commentId: string,
+  status: 'approved' | 'rejected' | 'spam'
+): Promise<void> {
+  const docRef = doc(db, COMMENTS_COLLECTION, commentId);
+  await updateDoc(docRef, {
+    status,
+    updatedAt: Timestamp.now(),
+  });
+}
+
+// Obtener todos los comentarios pendientes de moderación
+export async function getPendingComments(instanteId?: string): Promise<Comment[]> {
+  let q: any;
+
+  if (instanteId) {
+    q = query(
+      collection(db, COMMENTS_COLLECTION),
+      where('instanteId', '==', instanteId),
+      where('status', '==', 'pending'),
+      orderBy('createdAt', 'desc')
+    );
+  } else {
+    q = query(
+      collection(db, COMMENTS_COLLECTION),
+      where('status', '==', 'pending'),
+      orderBy('createdAt', 'desc')
+    );
+  }
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map(doc => {
+    const data = doc.data() as any;
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt?.toDate?.() || data.createdAt,
+      updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+      editedAt: data.editedAt?.toDate?.() || data.editedAt,
+      deletedAt: data.deletedAt?.toDate?.() || data.deletedAt,
+    };
+  }) as Comment[];
+}
+
+// Obtener conteo de comentarios de un instante
+export async function getCommentCount(instanteId: string): Promise<number> {
+  const comments = await getCommentsByInstante(instanteId);
+  return comments.length;
+}
+
+// ==================== FIN COMENTARIOS v0.6 ====================

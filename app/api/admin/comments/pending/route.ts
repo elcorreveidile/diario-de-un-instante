@@ -1,0 +1,72 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { adminAuth, adminDb } from '@/lib/firebase-admin';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('authorization');
+
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.split('Bearer ')[1];
+    const decoded = await adminAuth.verifyIdToken(token);
+
+    const { searchParams } = new URL(request.url);
+    const instanteId = searchParams.get('instanteId');
+
+    let q: any;
+
+    if (instanteId) {
+      q = adminDb
+        .collection('comments')
+        .where('instanteId', '==', instanteId)
+        .where('status', '==', 'pending')
+        .orderBy('createdAt', 'desc');
+    } else {
+      q = adminDb
+        .collection('comments')
+        .where('status', '==', 'pending')
+        .orderBy('createdAt', 'desc');
+    }
+
+    const snapshot = await q.get();
+
+    const comments = snapshot.docs.map((doc: any) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.() || data.createdAt,
+        updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+      };
+    });
+
+    return NextResponse.json({
+      success: true,
+      comments,
+      count: comments.length,
+    });
+  } catch (error) {
+    console.error('[API Admin Comments] Error:', error);
+
+    if (error instanceof Error && error.message.includes('Firebase ID token')) {
+      return NextResponse.json(
+        { error: 'Token inválido' },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Error al obtener comentarios pendientes',
+      },
+      { status: 500 }
+    );
+  }
+}

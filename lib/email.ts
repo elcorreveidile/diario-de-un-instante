@@ -248,3 +248,156 @@ export function generateNewsletterHTML(
     </html>
   `;
 }
+
+/**
+ * Enviar notificación de nuevo comentario al autor del instante
+ */
+export async function sendCommentNotification(
+  authorEmail: string,
+  instanteTitle: string,
+  commentContent: string,
+  commenterName: string,
+  instanteUrl: string
+) {
+  try {
+    await getResend().emails.send({
+      from: FROM_EMAIL,
+      to: authorEmail,
+      subject: `💬 Nuevo comentario en "${instanteTitle}"`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Nuevo comentario</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { text-align: center; margin-bottom: 30px; }
+              .logo { font-size: 24px; font-weight: bold; color: #7c3aed; }
+              .content { background: #f9fafb; border-radius: 8px; padding: 30px; margin-bottom: 20px; }
+              .comment-box { background: white; border-left: 3px solid #7c3aed; padding: 15px; margin: 20px 0; font-style: italic; }
+              .button { display: inline-block; background: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; }
+              .button:hover { background: #6d28d9; }
+              .footer { text-align: center; font-size: 12px; color: #6b7280; margin-top: 30px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <div class="logo">🌸 Diario de un Instante</div>
+              </div>
+
+              <div class="content">
+                <h1>💬 Nuevo comentario</h1>
+                <p><strong>${commenterName}</strong> dejó un comentario en tu instante:</p>
+
+                <p style="margin-top: 20px; font-weight: 500;">"${instanteTitle}"</p>
+
+                <div class="comment-box">
+                  "${commentContent}"
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${instanteUrl}" class="button">Ver comentario</a>
+                </div>
+
+                <p style="font-size: 14px; color: #666;">
+                  Puedes responder al comentario directamente en la página del instante.
+                </p>
+              </div>
+
+              <div class="footer">
+                <p>Diario de un Instante - Un jardín digital para cultivar una vida más consciente</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    console.log(`[Email] Notificación de comentario enviada a ${authorEmail}`);
+  } catch (error) {
+    console.error('[Email] Error enviando notificación de comentario:', error);
+    throw error;
+  }
+}
+
+/**
+ * Enviar notificación de respuesta a un comentario
+ */
+export async function sendCommentReplyNotification(
+  parentCommentAuthorEmail: string,
+  parentCommentAuthorName: string,
+  replyContent: string,
+  replierName: string,
+  instanteTitle: string,
+  instanteUrl: string
+) {
+  try {
+    await getResend().emails.send({
+      from: FROM_EMAIL,
+      to: parentCommentAuthorEmail,
+      subject: `💬 ${replierName} respondió a tu comentario`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Respuesta a tu comentario</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { text-align: center; margin-bottom: 30px; }
+              .logo { font-size: 24px; font-weight: bold; color: #7c3aed; }
+              .content { background: #f9fafb; border-radius: 8px; padding: 30px; margin-bottom: 20px; }
+              .reply-box { background: white; border-left: 3px solid #7c3aed; padding: 15px; margin: 20px 0; font-style: italic; }
+              .button { display: inline-block; background: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; }
+              .button:hover { background: #6d28d9; }
+              .footer { text-align: center; font-size: 12px; color: #6b7280; margin-top: 30px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <div class="logo">🌸 Diario de un Instante</div>
+              </div>
+
+              <div class="content">
+                <h1>💬 Nueva respuesta</h1>
+                <p>Hola <strong>${parentCommentAuthorName}</strong>,</p>
+                <p><strong>${replierName}</strong> respondió a tu comentario en:</p>
+
+                <p style="margin-top: 10px; font-weight: 500;">"${instanteTitle}"</p>
+
+                <div class="reply-box">
+                  "${replyContent}"
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${instanteUrl}" class="button">Ver respuesta</a>
+                </div>
+
+                <p style="font-size: 14px; color: #666;">
+                  Puedes seguir la conversación directamente en la página del instante.
+                </p>
+              </div>
+
+              <div class="footer">
+                <p>Diario de un Instante - Un jardín digital para cultivar una vida más consciente</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    console.log(`[Email] Notificación de respuesta enviada a ${parentCommentAuthorEmail}`);
+  } catch (error) {
+    console.error('[Email] Error enviando notificación de respuesta:', error);
+    throw error;
+  }
+}
+
