@@ -89,54 +89,22 @@ export default function HomePage() {
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
           Diario de un Instante
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
+        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
           Un jardín digital para cultivar un año 2026 más consciente y con propósito.
           Capturando pensamientos y acciones, un instante a la vez.
         </p>
-        <Link
-          href="/admin"
-          className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors text-sm"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Panel de admin
-        </Link>
-      </section>
 
-      {/* Estadísticas */}
-      <section className="mb-12">
-        <Stats
-          totalInstantes={stats.totalInstantes}
-          pensamientos={stats.pensamientos}
-          acciones={stats.acciones}
-          areasActivas={stats.areasActivas}
-          totalAreas={stats.totalAreas}
-        />
-      </section>
-
-      {/* Grid de Áreas */}
-      <section>
-        <h2 className="section-title">
-          Las 11 áreas de mi vida
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {areas.map((area) => (
-            <AreaCard key={area.id} area={area} />
-          ))}
-        </div>
-      </section>
-
-      {/* Sección: ¿Quieres tu propio diario? */}
-      <section className="mt-16 pt-12 border-t border-gray-200 dark:border-gray-700">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            ¿Quieres tu propio Diario de un Instante?
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">
-            Únete a nuestra comunidad y comienza tu viaje hacia una vida más consciente.
-            Crea tu diario personal, captura tus pensamientos y acciones, y cultiva tu propio jardín digital.
-          </p>
+        {/* Botones de acción */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors text-sm font-medium"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Panel de admin
+          </Link>
 
           {!showInviteForm ? (
             <button
@@ -148,7 +116,12 @@ export default function HomePage() {
               </svg>
               Solicitar invitación
             </button>
-          ) : (
+          ) : null}
+        </div>
+
+        {/* Formulario de solicitud de invitación */}
+        {showInviteForm && (
+          <div className="max-w-3xl mx-auto">
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8 text-left">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 Solicita tu invitación
@@ -246,7 +219,43 @@ export default function HomePage() {
                 </form>
               )}
             </div>
-          )}
+          </div>
+        )}
+
+        {/* Texto de invitación cuando no se muestra el formulario */}
+        {!showInviteForm && (
+          <div className="max-w-3xl mx-auto mt-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              ¿Quieres tu propio Diario de un Instante?
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Únete a nuestra comunidad y comienza tu viaje hacia una vida más consciente.
+              Crea tu diario personal, captura tus pensamientos y acciones, y cultiva tu propio jardín digital.
+            </p>
+          </div>
+        )}
+      </section>
+
+      {/* Estadísticas */}
+      <section className="mb-12">
+        <Stats
+          totalInstantes={stats.totalInstantes}
+          pensamientos={stats.pensamientos}
+          acciones={stats.acciones}
+          areasActivas={stats.areasActivas}
+          totalAreas={stats.totalAreas}
+        />
+      </section>
+
+      {/* Grid de Áreas */}
+      <section>
+        <h2 className="section-title">
+          Las 11 áreas de mi vida
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {areas.map((area) => (
+            <AreaCard key={area.id} area={area} />
+          ))}
         </div>
       </section>
     </div>
