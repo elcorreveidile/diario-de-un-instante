@@ -33,6 +33,11 @@ export default function InstantePage() {
 
   useEffect(() => {
     const loadInstante = async () => {
+      // Resetear estados al inicio
+      setNotFoundState(false);
+      setInstante(null);
+      setLoading(true);
+
       try {
         let allInstantes: Instante[];
 
@@ -77,6 +82,7 @@ export default function InstantePage() {
         if (!instante) {
           console.log('[InstantePage] No encontrado');
           setNotFoundState(true);
+          setLoading(false);
           return;
         }
         console.log('[InstantePage] Encontrado:', instante.titulo);
