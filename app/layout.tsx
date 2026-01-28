@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import Providers from '@/components/Providers';
 import FloatingButton from '@/components/FloatingButton';
 import GlobalHotkeys from '@/components/GlobalHotkeys';
+import Script from 'next/script';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -38,10 +39,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <head>
-        <meta property="fb:app_id" content="708534115647880" />
-      </head>
       <body className="flex flex-col min-h-screen">
+        <Script
+          id="fb-app-id"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: '<meta property="fb:app_id" content="708534115647880" />',
+          }}
+        />
         <Providers>
           <GlobalHotkeys />
           <Header />
