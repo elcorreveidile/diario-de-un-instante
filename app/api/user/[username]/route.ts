@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { collection, query, where, getDocs } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 
 export const runtime = 'nodejs';
@@ -17,12 +16,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { username } = params;
     console.log('[API] Obteniendo usuario:', username);
 
-    const usersRef = collection(adminDb, 'users');
     const usernameLower = username.toLowerCase();
 
     // Buscar por campo username
-    const qByUsername = query(usersRef, where('username', '==', usernameLower));
-    const snapshotByUsername = await getDocs(qByUsername);
+    const snapshotByUsername = await adminDb
+      .collection('users')
+      .where('username', '==', usernameLower)
+      .get();
 
     console.log('[API] Snapshot por username:', snapshotByUsername.size);
 
@@ -45,8 +45,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Fallback: buscar por displayName
     console.log('[API] Buscando por displayName:', username);
-    const qByDisplayName = query(usersRef, where('displayName', '==', username));
-    const snapshotByDisplayName = await getDocs(qByDisplayName);
+    const snapshotByDisplayName = await adminDb
+      .collection('users')
+      .where('displayName', '==', username)
+      .get();
 
     console.log('[API] Snapshot por displayName:', snapshotByDisplayName.size);
 

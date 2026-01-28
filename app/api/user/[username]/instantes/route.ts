@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { collection, query, where, getDocs } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 
 export const runtime = 'nodejs';
@@ -17,12 +16,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { username } = params;
     console.log('[API] Obteniendo instantes de:', username);
 
-    // Primero obtener el UID del usuario
-    const usersRef = collection(adminDb, 'users');
     const usernameLower = username.toLowerCase();
 
-    const qByUsername = query(usersRef, where('username', '==', usernameLower));
-    const snapshotByUsername = await getDocs(qByUsername);
+    // Primero obtener el UID del usuario
+    const snapshotByUsername = await adminDb
+      .collection('users')
+      .where('username', '==', usernameLower)
+      .get();
 
     let userUid: string | null = null;
 
@@ -30,8 +30,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       userUid = snapshotByUsername.docs[0].id;
     } else {
       // Fallback por displayName
-      const qByDisplayName = query(usersRef, where('displayName', '==', username));
-      const snapshotByDisplayName = await getDocs(qByDisplayName);
+      const snapshotByDisplayName = await adminDb
+        .collection('users')
+        .where('displayName', '==', username)
+        .get();
       if (!snapshotByDisplayName.empty) {
         userUid = snapshotByDisplayName.docs[0].id;
       }
@@ -42,9 +44,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Obtener instantes públicos del usuario
-    const instantesRef = collection(adminDb, 'instantes');
-    const q = query(instantesRef, where('userId', '==', userUid));
-    const snapshot = await getDocs(q);
+    const snapshot = await adminDb
+      .collection('instantes')
+      .where('userId', '==', userUid)
+      .get();
 
     const allInstantes = snapshot.docs.map(doc => ({
       id: doc.id,

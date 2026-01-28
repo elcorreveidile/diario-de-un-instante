@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { collection, getDocs } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 
 export const runtime = 'nodejs';
@@ -11,10 +10,7 @@ export async function GET() {
     console.log('[API Debug] Iniciando petición con Firebase Admin SDK');
     console.log('[API Debug] adminDb inicializado:', !!adminDb);
 
-    const usersRef = collection(adminDb, 'users');
-    console.log('[API Debug] Referencia a colección creada');
-
-    const snapshot = await getDocs(usersRef);
+    const snapshot = await adminDb.collection('users').get();
     console.log('[API Debug] Snapshot obtenido, tamaño:', snapshot.size);
 
     const users = snapshot.docs.map(doc => ({
