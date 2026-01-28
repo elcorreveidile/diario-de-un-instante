@@ -193,6 +193,30 @@ export default function InstantePage() {
     );
   }
 
+  // Mostrar pantalla de carga si user es null (auth no listo)
+  if (loading || !user) {
+    return (
+      <div className="container-page max-w-3xl">
+        <div className="text-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 dark:border-white mx-auto"></div>
+          <p className="mt-4 text-gray-500 dark:text-gray-400">Cargando instante...</p>
+          {/* Debug info */}
+          <div className="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-left">
+            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200">
+              [DEBUG] Usuario: {user?.uid || 'no autenticado (cargando...)'}
+            </p>
+            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200">
+              [DEBUG] Buscando: {areaId}/{slug}
+            </p>
+            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200">
+              [DEBUG] Estado: {loading ? 'loading' : 'ready'} | User: {user ? 'auténtico' : 'null'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="container-page max-w-3xl relative">
