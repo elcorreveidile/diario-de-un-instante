@@ -44,9 +44,9 @@ export default function Header() {
             </Link>
 
             {/* Enlace al perfil del usuario autenticado */}
-            {user && userProfile && (
+            {user && userProfile && userProfile.displayName && (
               <Link
-                href={`/@${userProfile.displayName?.toLowerCase() || user.email?.split('@')[0]}`}
+                href={`/u/${userProfile.displayName.toLowerCase()}`}
                 className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors font-medium"
               >
                 Mi Blog

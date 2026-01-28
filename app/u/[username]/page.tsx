@@ -5,6 +5,13 @@ import { getBlogConfig, getUserByUsername, getPublicInstantesByUser } from '@/li
 import InstanteCard from '@/components/InstanteCard';
 
 export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const revalidate = 0;
+
+// No pre-generar ninguna página estática
+export async function generateStaticParams() {
+  return [];
+}
 
 interface PageProps {
   params: {
@@ -14,37 +21,60 @@ interface PageProps {
 
 // Generar metadata dinámica
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const user = await getUserByUsername(params.username);
-
-  if (!user) {
+  // Durante build, retornar metadata genérica
+  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'test') {
     return {
-      title: 'Usuario no encontrado',
+      title: 'Diario de un Instante',
     };
   }
 
-  const blogConfig = await getBlogConfig(user.uid);
+  try {
+    const user = await getUserByUsername(params.username);
 
-  return {
-    title: `Diario de un Instante de ${blogConfig?.displayName || user.displayName}`,
-    description: blogConfig?.bio || `Los instantes públicos de ${blogConfig?.displayName || user.displayName}`,
-  };
+    if (!user) {
+      return {
+        title: 'Usuario no encontrado',
+      };
+    }
+
+    const blogConfig = await getBlogConfig(user.uid);
+
+    return {
+      title: `Diario de un Instante de ${blogConfig?.displayName || user.displayName || params.username}`,
+      description: blogConfig?.bio || `Los instantes públicos de ${blogConfig?.displayName || user.displayName || params.username}`,
+    };
+  } catch (error) {
+    return {
+      title: 'Diario de un Instante',
+    };
+  }
 }
 
 export default async function UserProfilePage({ params }: PageProps) {
-  // Buscar usuario por username
-  const user = await getUserByUsername(params.username);
-
-  if (!user) {
-    notFound();
+  // Saltar durante build time
+  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'test') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Cargando perfil...</p>
+      </div>
+    );
   }
 
-  // Obtener configuración del blog
-  const blogConfig = await getBlogConfig(user.uid);
+  try {
+    // Buscar usuario por username
+    const user = await getUserByUsername(params.username);
 
-  // Obtener instantes públicos del usuario
-  const instantes = await getPublicInstantesByUser(user.uid);
+    if (!user) {
+      notFound();
+    }
 
-  // Aplicar colores personalizados
+    // Obtener configuración del blog
+    const blogConfig = await getBlogConfig(user.uid);
+
+    // Obtener instantes públicos del usuario
+    const instantes = await getPublicInstantesByUser(user.uid);
+
+    // Aplicar colores personalizados
   const primaryColor = blogConfig?.primaryColor || '#8b5cf6';
   const secondaryColor = blogConfig?.secondaryColor || '#f5f3ff';
 
@@ -172,4 +202,8 @@ export default async function UserProfilePage({ params }: PageProps) {
       </footer>
     </div>
   );
+} catch (error) {
+  console.error('Error loading user profile:', error);
+  notFound();
+}
 }
