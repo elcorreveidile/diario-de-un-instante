@@ -74,8 +74,8 @@ export default async function DebugUsersPage() {
           <h2 className="text-lg font-semibold text-blue-900 mb-2">Instrucciones</h2>
           <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1">
             <li>Busca tu usuario en la tabla anterior (por email o display name)</li>
-            <li>Si ves "No configurado" en Username, ve a <a href="/admin/configuracion-blog" className="underline font-semibold">/admin/configuracion-blog</a></li>
-            <li>Ingresa el username que quieras usar (ej: "javier")</li>
+            <li>Si ves &quot;No configurado&quot; en Username, ve a <a href="/admin/configuracion-blog" className="underline font-semibold">/admin/configuracion-blog</a></li>
+            <li>Ingresa el username que quieras usar (ej: &quot;javier&quot;)</li>
             <li>Guarda la configuración</li>
             <li>Luego tu blog estará accesible en <code>/u/[username]</code></li>
           </ol>
