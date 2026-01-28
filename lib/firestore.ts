@@ -473,6 +473,7 @@ export async function updateBlogConfig(userId: string, config: Partial<BlogConfi
 
 // Obtener usuario por username (campo username o displayName para compatibilidad)
 export async function getUserByUsername(username: string): Promise<Usuario | null> {
+  console.log('[getUserByUsername] Buscando:', username);
   const usersRef = collection(db, 'users');
   const usernameLower = username.toLowerCase();
 
@@ -480,9 +481,12 @@ export async function getUserByUsername(username: string): Promise<Usuario | nul
   const qByUsername = query(usersRef, where('username', '==', usernameLower));
   const snapshotByUsername = await getDocs(qByUsername);
 
+  console.log('[getUserByUsername] Por username:', usernameLower, 'resultados:', snapshotByUsername.size);
+
   if (!snapshotByUsername.empty) {
     const userDoc = snapshotByUsername.docs[0];
     const data = userDoc.data();
+    console.log('[getUserByUsername] Usuario encontrado por username:', data.username);
     return {
       uid: userDoc.id,
       email: data.email || '',
@@ -498,9 +502,12 @@ export async function getUserByUsername(username: string): Promise<Usuario | nul
   const qByDisplayName = query(usersRef, where('displayName', '==', username));
   const snapshotByDisplayName = await getDocs(qByDisplayName);
 
+  console.log('[getUserByUsername] Por displayName:', username, 'resultados:', snapshotByDisplayName.size);
+
   if (!snapshotByDisplayName.empty) {
     const userDoc = snapshotByDisplayName.docs[0];
     const data = userDoc.data();
+    console.log('[getUserByUsername] Usuario encontrado por displayName:', data.displayName);
     return {
       uid: userDoc.id,
       email: data.email || '',
@@ -512,6 +519,7 @@ export async function getUserByUsername(username: string): Promise<Usuario | nul
     };
   }
 
+  console.log('[getUserByUsername] Usuario no encontrado');
   return null;
 }
 

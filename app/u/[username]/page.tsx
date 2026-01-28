@@ -61,18 +61,27 @@ export default async function UserProfilePage({ params }: PageProps) {
   }
 
   try {
+    console.log('[UserProfile] Buscando usuario:', params.username);
+
     // Buscar usuario por username
     const user = await getUserByUsername(params.username);
 
+    console.log('[UserProfile] Usuario encontrado:', user ? `${user.uid} (${user.displayName})` : 'null');
+
     if (!user) {
+      console.log('[UserProfile] Usuario no encontrado, mostrando 404');
       notFound();
     }
 
     // Obtener configuración del blog
     const blogConfig = await getBlogConfig(user.uid);
 
+    console.log('[UserProfile] Blog config:', blogConfig);
+
     // Obtener instantes públicos del usuario
     const instantes = await getPublicInstantesByUser(user.uid);
+
+    console.log('[UserProfile] Instantes encontrados:', instantes.length);
 
     // Aplicar colores personalizados
   const primaryColor = blogConfig?.primaryColor || '#8b5cf6';
