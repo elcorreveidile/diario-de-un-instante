@@ -31,9 +31,12 @@ export default function InstantePage() {
       try {
         let allInstantes: Instante[];
 
+        console.log('[InstantePage] Usuario:', user?.uid, 'Buscando:', areaId, slug);
+
         // Si hay usuario logueado, obtener sus instantes (incluyendo privados)
         if (user?.uid) {
           const userInstantes = await getInstantesByUser(user.uid);
+          console.log('[InstantePage] Instantes del usuario:', userInstantes.length);
           // Obtener también los instantes públicos de otros usuarios
           const publicInstantes = await getAllInstantes();
           // Combinar sin duplicados
@@ -43,6 +46,8 @@ export default function InstantePage() {
           allInstantes = await getAllInstantes();
         }
 
+        console.log('[InstantePage] Total instantes:', allInstantes.length);
+
         // Filtrar: por área Y slug Y ((públicos O sin campo privado) O (pertenece al usuario))
         const instante = allInstantes.find(i => {
           const matchArea = i.area === areaId;
@@ -50,13 +55,26 @@ export default function InstantePage() {
           const esPublico = i.privado === false || !i.hasOwnProperty('privado');
           const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
           const esDelUsuario = user?.uid && i.userId === user.uid;
+
+          console.log('[InstantePage] Checking', i.slug, {
+            matchArea,
+            matchSlug,
+            esPublico,
+            esVisible,
+            esDelUsuario,
+            userId: i.userId,
+            privado: i.privado,
+          });
+
           return matchArea && matchSlug && (esPublico || esDelUsuario) && esVisible;
         });
 
         if (!instante) {
+          console.log('[InstantePage] No encontrado');
           setNotFoundState(true);
           return;
         }
+        console.log('[InstantePage] Encontrado:', instante.titulo);
         setInstante(instante);
 
         // Convertir Markdown a HTML
