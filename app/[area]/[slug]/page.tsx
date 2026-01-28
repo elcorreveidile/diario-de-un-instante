@@ -94,10 +94,10 @@ export default function InstantePage() {
         // Convertir Markdown a HTML
         const processedContent = await remark()
           .use(html)
-          .process(found.content);
-        let html = processedContent.toString();
-        html = html.replace(/<a href=/g, '<a target="_blank" rel="noopener" href=');
-        setContentHtml(html);
+          .process(found.content) as any;
+        let htmlContent = processedContent.toString();
+        htmlContent = htmlContent.replace(/<a href=/g, '<a target="_blank" rel="noopener" href=');
+        setContentHtml(htmlContent);
         setLoading(false);
 
       } catch (error) {
