@@ -6,6 +6,8 @@ import { getBlogConfig, updateBlogConfig, BlogConfig } from '@/lib/firestore';
 import { uploadAvatar, uploadHeaderPhoto } from '@/lib/storage';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default function ConfigurarBlogPage() {
   const { user, userProfile, loading } = useAuth();
   const [config, setConfig] = useState<BlogConfig>({
@@ -361,7 +363,7 @@ export default function ConfigurarBlogPage() {
           </div>
         </form>
 
-        {/* Ver blog */}
+        {/* Ver blog - Enlace a perfil público */}
         <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
             Una vez guardada la configuración, tu blog estará disponible en:
