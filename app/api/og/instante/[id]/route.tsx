@@ -1,17 +1,19 @@
 import { ImageResponse } from '@vercel/og';
 import { NextRequest } from 'next/server';
-import { getInstanteById, getAreaInfo } from '@/lib/firestore';
-
-export const runtime = 'edge';
+import { getAreaInfo } from '@/lib/firestore';
+import { adminDb } from '@/lib/firebase-admin';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const instanteId = params.id;
 
-    // Obtener datos del instante
-    const instante = await getInstanteById(instanteId);
+    console.log('[OG Image] Generando para instante:', instanteId);
 
-    if (!instante) {
+    // Obtener datos del instante usando Admin SDK
+    const doc = await adminDb.collection('instantes').doc(instanteId).get();
+
+    if (!doc.exists) {
+      console.log('[OG Image] Instante no encontrado');
       return new ImageResponse(
         (
           <div
@@ -33,6 +35,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         { width: 1200, height: 630 }
       );
     }
+
+    const instante = {
+      id: doc.id,
+      ...doc.data(),
+    } as any;
 
     const areaInfo = getAreaInfo(instante.area);
 
