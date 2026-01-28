@@ -127,6 +127,7 @@ export interface AreaConUltimoInstante {
 // Configuración del blog del usuario (v0.5.2)
 export interface BlogConfig {
   displayName: string; // Nombre para mostrar en "Diario de un Instante de..."
+  username?: string; // Username único en minúsculas para URLs (/u/username)
   bio?: string; // Descripción del usuario
   photoURL?: string; // URL de foto de perfil
   headerPhotoURL?: string; // URL de foto de cabecera
@@ -547,6 +548,7 @@ export interface Usuario {
   uid: string;
   email: string;
   displayName?: string;
+  username?: string; // Username único en minúsculas para URLs (/u/username)
   role: 'admin' | 'user';
   createdAt: Date;
   emailVerified?: boolean;
@@ -612,6 +614,7 @@ export async function getBlogConfig(userId: string): Promise<BlogConfig | null> 
   const data = userDoc.data();
   return {
     displayName: data.displayName || data.email?.split('@')[0] || 'Usuario',
+    username: data.username,
     bio: data.bio,
     photoURL: data.photoURL,
     headerPhotoURL: data.headerPhotoURL,
@@ -625,6 +628,7 @@ export async function updateBlogConfig(userId: string, config: Partial<BlogConfi
   const updateData: any = {};
 
   if (config.displayName !== undefined) updateData.displayName = config.displayName;
+  if (config.username !== undefined) updateData.username = config.username.toLowerCase();
   if (config.bio !== undefined) updateData.bio = config.bio;
   if (config.photoURL !== undefined) updateData.photoURL = config.photoURL;
   if (config.headerPhotoURL !== undefined) updateData.headerPhotoURL = config.headerPhotoURL;
@@ -634,26 +638,48 @@ export async function updateBlogConfig(userId: string, config: Partial<BlogConfi
   await updateDoc(doc(db, 'users', userId), updateData);
 }
 
-// Obtener usuario por username (email o parte del email)
+// Obtener usuario por username (campo username o displayName para compatibilidad)
 export async function getUserByUsername(username: string): Promise<Usuario | null> {
   const usersRef = collection(db, 'users');
-  const q = query(usersRef, where('displayName', '==', username));
-  const snapshot = await getDocs(q);
+  const usernameLower = username.toLowerCase();
 
-  if (snapshot.empty) {
-    return null;
+  // Primero buscar por campo username (nuevo sistema)
+  const qByUsername = query(usersRef, where('username', '==', usernameLower));
+  const snapshotByUsername = await getDocs(qByUsername);
+
+  if (!snapshotByUsername.empty) {
+    const userDoc = snapshotByUsername.docs[0];
+    const data = userDoc.data();
+    return {
+      uid: userDoc.id,
+      email: data.email || '',
+      displayName: data.displayName || '',
+      username: data.username,
+      role: data.role || 'user',
+      createdAt: data.createdAt?.toDate() || new Date(),
+      emailVerified: data.emailVerified || false,
+    };
   }
 
-  const userDoc = snapshot.docs[0];
-  const data = userDoc.data();
-  return {
-    uid: userDoc.id,
-    email: data.email || '',
-    displayName: data.displayName || '',
-    role: data.role || 'user',
-    createdAt: data.createdAt?.toDate() || new Date(),
-    emailVerified: data.emailVerified || false,
-  };
+  // Fallback: buscar por displayName (compatibilidad con datos antiguos)
+  const qByDisplayName = query(usersRef, where('displayName', '==', username));
+  const snapshotByDisplayName = await getDocs(qByDisplayName);
+
+  if (!snapshotByDisplayName.empty) {
+    const userDoc = snapshotByDisplayName.docs[0];
+    const data = userDoc.data();
+    return {
+      uid: userDoc.id,
+      email: data.email || '',
+      displayName: data.displayName || '',
+      username: data.username,
+      role: data.role || 'user',
+      createdAt: data.createdAt?.toDate() || new Date(),
+      emailVerified: data.emailVerified || false,
+    };
+  }
+
+  return null;
 }
 
 // ==================== FIN NUEVAS FUNCIONES v0.5.2 ====================

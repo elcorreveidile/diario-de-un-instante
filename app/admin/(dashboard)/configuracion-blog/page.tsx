@@ -12,6 +12,7 @@ export default function ConfigurarBlogPage() {
   const { user, userProfile, loading } = useAuth();
   const [config, setConfig] = useState<BlogConfig>({
     displayName: '',
+    username: '',
     bio: '',
     photoURL: '',
     headerPhotoURL: '',
@@ -267,6 +268,27 @@ export default function ConfigurarBlogPage() {
             </p>
           </div>
 
+          {/* Username */}
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Username (para tu URL)
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-sm">diariodeuninstante.com/u/</span>
+              <input
+                type="text"
+                id="username"
+                value={config.username}
+                onChange={(e) => setConfig({ ...config, username: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono"
+                placeholder="maria-garcia"
+              />
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Solo letras, números y guiones. Se convertirá a minúsculas automáticamente.
+            </p>
+          </div>
+
           {/* Bio */}
           <div>
             <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -364,13 +386,13 @@ export default function ConfigurarBlogPage() {
         </form>
 
         {/* Ver blog - Enlace a perfil público */}
-        {config.displayName && (
+        {config.username && (
           <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
               Una vez guardada la configuración, tu blog estará disponible en:
             </p>
             <Link
-              href={`/u/${config.displayName.toLowerCase()}`}
+              href={`/u/${config.username}`}
               target="_blank"
               className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-sm"
             >
