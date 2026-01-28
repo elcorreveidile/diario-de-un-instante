@@ -21,8 +21,12 @@ function generateToken(): string {
 // Confirmar suscripción (double opt-in)
 export async function confirmSubscription(token: string): Promise<{ success: boolean; message: string; email?: string }> {
   try {
-    const q = query(collection(db, NEWSLETTER_COLLECTION), where('confirmationToken', '==', token));
-    const snapshot = await getDocs(q);
+    // Usar Admin SDK para evitar problemas de permisos
+    const { adminDb } = await import('@/lib/firebase-admin');
+    const snapshot = await adminDb
+      .collection(NEWSLETTER_COLLECTION)
+      .where('confirmationToken', '==', token)
+      .get();
 
     if (snapshot.empty) {
       return {
@@ -42,7 +46,7 @@ export async function confirmSubscription(token: string): Promise<{ success: boo
       };
     }
 
-    await updateDoc(doc.ref, {
+    await doc.ref.update({
       status: 'active',
       confirmedAt: new Date(),
     });
@@ -56,7 +60,7 @@ export async function confirmSubscription(token: string): Promise<{ success: boo
     console.error('[Newsletter] Error confirmando:', error);
     return {
       success: false,
-      message: 'Error al confirmar suscripción',
+      message: error instanceof Error ? error.message : 'Error al confirmar suscripción',
     };
   }
 }
@@ -64,8 +68,12 @@ export async function confirmSubscription(token: string): Promise<{ success: boo
 // Desuscribirse
 export async function unsubscribeFromNewsletter(token: string): Promise<{ success: boolean; message: string }> {
   try {
-    const q = query(collection(db, NEWSLETTER_COLLECTION), where('unsubscribeToken', '==', token));
-    const snapshot = await getDocs(q);
+    // Usar Admin SDK para evitar problemas de permisos
+    const { adminDb } = await import('@/lib/firebase-admin');
+    const snapshot = await adminDb
+      .collection(NEWSLETTER_COLLECTION)
+      .where('unsubscribeToken', '==', token)
+      .get();
 
     if (snapshot.empty) {
       return {
@@ -76,7 +84,7 @@ export async function unsubscribeFromNewsletter(token: string): Promise<{ succes
 
     const doc = snapshot.docs[0];
 
-    await updateDoc(doc.ref, {
+    await doc.ref.update({
       status: 'unsubscribed',
       unsubscribedAt: new Date(),
     });
@@ -89,7 +97,7 @@ export async function unsubscribeFromNewsletter(token: string): Promise<{ succes
     console.error('[Newsletter] Error desuscribiendo:', error);
     return {
       success: false,
-      message: 'Error al cancelar suscripción',
+      message: error instanceof Error ? error.message : 'Error al cancelar suscripción',
     };
   }
 }
@@ -97,17 +105,25 @@ export async function unsubscribeFromNewsletter(token: string): Promise<{ succes
 // Obtener todos los suscriptores activos
 export async function getActiveSubscribers(): Promise<NewsletterSubscriber[]> {
   try {
-    const q = query(
-      collection(db, NEWSLETTER_COLLECTION),
-      where('status', '==', 'active')
-    );
-    const snapshot = await getDocs(q);
+    // Usar Admin SDK para evitar problemas de permisos
+    const { adminDb } = await import('@/lib/firebase-admin');
+    const snapshot = await adminDb
+      .collection(NEWSLETTER_COLLECTION)
+      .where('status', '==', 'active')
+      .get();
 
-    return snapshot.docs.map(doc => ({
-      email: doc.data().email,
-      status: doc.data().status,
-      ...(doc.data() as Omit<NewsletterSubscriber, 'email' | 'status'>),
-    })) as NewsletterSubscriber[];
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        email: data.email,
+        status: data.status,
+        confirmationToken: data.confirmationToken,
+        unsubscribeToken: data.unsubscribeToken,
+        subscribedAt: data.subscribedAt?.toDate?.() || data.subscribedAt,
+        confirmedAt: data.confirmedAt?.toDate?.() || data.confirmedAt,
+        unsubscribedAt: data.unsubscribedAt?.toDate?.() || data.unsubscribedAt,
+      };
+    }) as NewsletterSubscriber[];
   } catch (error) {
     console.error('[Newsletter] Error obteniendo suscriptores:', error);
     return [];
