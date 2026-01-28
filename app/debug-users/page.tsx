@@ -23,7 +23,7 @@ export default async function DebugUsersPage() {
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({ error: 'Error desconocido' }));
-    error = errorData.error || 'Error al cargar usuarios';
+    error = `${errorData.error || 'Error al cargar usuarios'}: ${errorData.message || errorData.code || 'Desconocido'}`;
     console.error('[DebugUsers] Error al cargar usuarios:', errorData);
   } else {
     users = await res.json();
