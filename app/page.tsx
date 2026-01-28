@@ -46,6 +46,53 @@ export default function HomePage() {
     loadData();
   }, []);
 
+  // Efecto: Establecer meta tags OG para la home
+  useEffect(() => {
+    const ogImageUrl = `${window.location.origin}/api/og/home`;
+    const title = 'Diario de un Instante';
+    const description = 'Un jardín digital para cultivar un año 2026 más consciente y con propósito. Capturando pensamientos y acciones, un instante a la vez.';
+
+    // Actualizar o crear meta tags
+    const setMetaTag = (property: string, content: string) => {
+      let element = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('property', property);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    const setNameTag = (name: string, content: string) => {
+      let element = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('name', name);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    // Open Graph tags
+    setMetaTag('og:title', title);
+    setMetaTag('og:description', description);
+    setMetaTag('og:image', ogImageUrl);
+    setMetaTag('og:image:width', '1200');
+    setMetaTag('og:image:height', '630');
+    setMetaTag('og:type', 'website');
+    setMetaTag('og:url', window.location.href);
+    setMetaTag('og:site_name', 'Diario de un Instante');
+
+    // Twitter Card tags
+    setNameTag('twitter:card', 'summary_large_image');
+    setNameTag('twitter:title', title);
+    setNameTag('twitter:description', description);
+    setNameTag('twitter:image', ogImageUrl);
+
+    // Actualizar título de la página
+    document.title = title;
+  }, []);
+
   const handleInviteSubmit = async (e: FormEvent) => {
     e.preventDefault();
 

@@ -173,6 +173,60 @@ export default function InstantePage() {
     };
   }, [zenMode]);
 
+  // Efecto: Actualizar meta tags OG cuando se carga el instante
+  useEffect(() => {
+    if (!instante || !areaInfo) return;
+
+    const ogImageUrl = `${window.location.origin}/api/og/instante/${instante.id}`;
+    const title = instante.titulo;
+    const description = instante.content.replace(/[#*`\[\]]/g, '').substring(0, 150) + '...';
+
+    // Actualizar o crear meta tags
+    const setMetaTag = (property: string, content: string) => {
+      let element = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('property', property);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    const setNameTag = (name: string, content: string) => {
+      let element = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('name', name);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    // Open Graph tags
+    setMetaTag('og:title', title);
+    setMetaTag('og:description', description);
+    setMetaTag('og:image', ogImageUrl);
+    setMetaTag('og:image:width', '1200');
+    setMetaTag('og:image:height', '630');
+    setMetaTag('og:type', 'article');
+    setMetaTag('og:url', window.location.href);
+    setMetaTag('og:site_name', 'Diario de un Instante');
+
+    // Twitter Card tags
+    setNameTag('twitter:card', 'summary_large_image');
+    setNameTag('twitter:title', title);
+    setNameTag('twitter:description', description);
+    setNameTag('twitter:image', ogImageUrl);
+
+    // Actualizar título de la página
+    document.title = `${title} | ${areaInfo.nombre} - Diario de un Instante`;
+
+    // Cleanup
+    return () => {
+      // No hacemos cleanup porque los meta tags deben persistir
+    };
+  }, [instante, areaInfo]);
+
   if (!areaInfo) {
     notFound();
   }
