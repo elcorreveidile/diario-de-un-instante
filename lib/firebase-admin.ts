@@ -1,5 +1,6 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 const projectIds = [
   process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
@@ -54,3 +55,4 @@ function initFirebaseAdmin() {
 
 // Exportar las instancias
 export const adminDb = getFirestore(initFirebaseAdmin());
+export const adminAuth = getAuth(initFirebaseAdmin());

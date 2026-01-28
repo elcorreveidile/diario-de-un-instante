@@ -6,7 +6,6 @@ import { getGlobalAreasConUltimoInstante, getGlobalEstadisticas, AreaConUltimoIn
 import AreaCard from '@/components/AreaCard';
 import Stats from '@/components/Stats';
 import { createInvitationRequest } from '@/lib/invites';
-import { subscribeToNewsletter } from '@/lib/newsletter';
 
 export default function HomeContent() {
   const [areas, setAreas] = useState<AreaConUltimoInstante[]>([]);
@@ -91,12 +90,19 @@ export default function HomeContent() {
     setNewsletterError('');
 
     try {
-      const result = await subscribeToNewsletter(newsletterEmail);
-      if (result.success) {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         setNewsletterSuccess(true);
         setNewsletterEmail('');
       } else {
-        setNewsletterError(result.message);
+        setNewsletterError(data.message || 'Error al suscribirse');
       }
     } catch (error: any) {
       console.error('Error suscribiendo newsletter:', error);

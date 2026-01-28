@@ -66,6 +66,12 @@ export default function AdminLayout({
                 >
                   Estadísticas
                 </Link>
+                <Link
+                  href="/admin/newsletters"
+                  className="text-gray-600 hover:text-gray-900 text-sm"
+                >
+                  Newsletters
+                </Link>
                 {isAdmin && (
                   <>
                     <Link
@@ -176,6 +182,13 @@ export default function AdminLayout({
                 className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
               >
                 Estadísticas
+              </Link>
+              <Link
+                href="/admin/newsletters"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
+              >
+                Newsletters
               </Link>
               {isAdmin && (
                 <>

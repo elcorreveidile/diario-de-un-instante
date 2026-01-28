@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { confirmSubscription } from '@/lib/newsletter';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,16 @@ export default async function ConfirmPage({ searchParams }: ConfirmPageProps) {
   }
 
   const result = await confirmSubscription(token);
+
+  // Enviar email de bienvenida si la confirmación fue exitosa
+  if (result.success && result.email) {
+    try {
+      await sendWelcomeEmail(result.email);
+    } catch (error) {
+      console.error('[Newsletter] Error enviando welcome:', error);
+      // No fallar la página si falla el email
+    }
+  }
 
   return (
     <div className="container-page max-w-2xl">

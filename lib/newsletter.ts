@@ -18,76 +18,8 @@ function generateToken(): string {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-// Suscribir email a newsletter
-export async function subscribeToNewsletter(email: string): Promise<{ success: boolean; message: string; alreadySubscribed?: boolean }> {
-  try {
-    // Verificar si ya existe
-    const q = query(collection(db, NEWSLETTER_COLLECTION), where('email', '==', email));
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      const existingDoc = snapshot.docs[0];
-      const existingData = existingDoc.data();
-
-      // Si ya está activo o pendiente
-      if (existingData.status === 'active' || existingData.status === 'pending') {
-        return {
-          success: false,
-          message: 'Este email ya está suscrito a la newsletter',
-          alreadySubscribed: true,
-        };
-      }
-
-      // Si estaba desuscripto, reactivar
-      if (existingData.status === 'unsubscribed') {
-        await updateDoc(existingDoc.ref, {
-          status: 'pending',
-          confirmationToken: generateToken(),
-          subscribedAt: new Date(),
-          confirmedAt: null,
-          unsubscribedAt: null,
-        });
-
-        // Enviar email de confirmación
-        await sendConfirmationEmail(email, existingData.data().confirmationToken);
-
-        return {
-          success: true,
-          message: '¡Gracias por volver! Te hemos enviado un email para confirmar tu suscripción',
-        };
-      }
-    }
-
-    // Nueva suscripción
-    const confirmationToken = generateToken();
-    const unsubscribeToken = generateToken();
-
-    await addDoc(collection(db, NEWSLETTER_COLLECTION), {
-      email,
-      status: 'pending',
-      confirmationToken,
-      unsubscribeToken,
-      subscribedAt: new Date(),
-    });
-
-    // Enviar email de confirmación
-    await sendConfirmationEmail(email, confirmationToken);
-
-    return {
-      success: true,
-      message: '¡Gracias por suscribirte! Te hemos enviado un email para confirmar tu suscripción',
-    };
-  } catch (error) {
-    console.error('[Newsletter] Error suscribiendo:', error);
-    return {
-      success: false,
-      message: 'Error al suscribirse. Por favor inténtalo de nuevo.',
-    };
-  }
-}
-
 // Confirmar suscripción (double opt-in)
-export async function confirmSubscription(token: string): Promise<{ success: boolean; message: string }> {
+export async function confirmSubscription(token: string): Promise<{ success: boolean; message: string; email?: string }> {
   try {
     const q = query(collection(db, NEWSLETTER_COLLECTION), where('confirmationToken', '==', token));
     const snapshot = await getDocs(q);
@@ -106,6 +38,7 @@ export async function confirmSubscription(token: string): Promise<{ success: boo
       return {
         success: true,
         message: 'Tu suscripción ya estaba confirmada',
+        email: data.email,
       };
     }
 
@@ -117,6 +50,7 @@ export async function confirmSubscription(token: string): Promise<{ success: boo
     return {
       success: true,
       message: '¡Suscripción confirmada! Ahora recibirás nuestras actualizaciones',
+      email: data.email,
     };
   } catch (error) {
     console.error('[Newsletter] Error confirmando:', error);
@@ -178,31 +112,4 @@ export async function getActiveSubscribers(): Promise<NewsletterSubscriber[]> {
     console.error('[Newsletter] Error obteniendo suscriptores:', error);
     return [];
   }
-}
-
-// Enviar email de confirmación (mock - se implementará con Resend/SendGrid después)
-async function sendConfirmationEmail(email: string, token: string): Promise<void> {
-  const baseUrl = 'https://www.diariodeuninstante.com';
-  const confirmUrl = `${baseUrl}/newsletter/confirm?token=${token}`;
-
-  console.log('[Newsletter] Email de confirmación para:', email);
-  console.log('[Newsletter] URL de confirmación:', confirmUrl);
-
-  // TODO: Implementar con Resend o SendGrid
-  // Por ahora, solo loggear
-
-  /*
-  Ejemplo de implementación futura con Resend:
-  await resend.emails.send({
-    from: 'Diario de un Instante <newsletter@diariodeuninstante.com>',
-    to: email,
-    subject: 'Confirma tu suscripción',
-    html: `
-      <h1>Confirma tu suscripción</h1>
-      <p>Gracias por suscribirte a Diario de un Instante.</p>
-      <p>Haz clic en el siguiente enlace para confirmar:</p>
-      <a href="${confirmUrl}">Confirmar suscripción</a>
-    `
-  });
-  */
 }
