@@ -10,6 +10,7 @@ import {
   where,
   orderBy,
   Timestamp,
+  runTransaction,
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -99,6 +100,9 @@ export interface Instante {
   privado: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  // v0.6 - Reacciones
+  likes?: string[]; // Array de UIDs de usuarios que dieron like
+  likeCount?: number; // Contador de likes (para ordenamiento)
 }
 
 // Interfaz para crear/actualizar
@@ -651,6 +655,124 @@ export async function getEstadisticasByUser(userId: string) {
     areasActivas,
     totalAreas: AREAS.length,
   };
+}
+
+// ==================== v0.6 - REACCIONES ====================
+
+// Alternar like de un usuario en un instante
+export async function toggleLike(instanteId: string, userId: string): Promise<{ liked: boolean; likeCount: number }> {
+  try {
+    const result = await runTransaction(db, async (transaction) => {
+      const instanteRef = doc(db, COLLECTION_NAME, instanteId);
+      const instanteDoc = await transaction.get(instanteRef);
+
+      if (!instanteDoc.exists()) {
+        throw new Error('El instante no existe');
+      }
+
+      const instante = instanteDoc.data() as Instante;
+
+      // Solo permitir likes en instantes públicos
+      const esPublico = instante.privado === false || !instante.hasOwnProperty('privado');
+      if (!esPublico) {
+        throw new Error('Solo se puede dar like a instantes públicos');
+      }
+
+      const likes = instante.likes || [];
+      const alreadyLiked = likes.includes(userId);
+
+      let newLikes: string[];
+      if (alreadyLiked) {
+        // Quitar like
+        newLikes = likes.filter(uid => uid !== userId);
+      } else {
+        // Agregar like
+        newLikes = [...likes, userId];
+      }
+
+      // Actualizar documento
+      transaction.update(instanteRef, {
+        likes: newLikes,
+        likeCount: newLikes.length,
+        updatedAt: new Date(),
+      });
+
+      return {
+        liked: !alreadyLiked,
+        likeCount: newLikes.length,
+      };
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Error en toggleLike:', error);
+    throw error;
+  }
+}
+
+// Verificar si un usuario dio like a un instante
+export async function userLikedInstante(instanteId: string, userId: string): Promise<boolean> {
+  try {
+    const instanteDoc = await getDoc(doc(db, COLLECTION_NAME, instanteId));
+
+    if (!instanteDoc.exists()) {
+      return false;
+    }
+
+    const instante = instanteDoc.data() as Instante;
+    const likes = instante.likes || [];
+
+    return likes.includes(userId);
+  } catch (error) {
+    console.error('Error en userLikedInstante:', error);
+    return false;
+  }
+}
+
+// Obtener instantes más likeados
+export async function getMostLikedInstantes(limit: number = 10): Promise<Instante[]> {
+  try {
+    const q = query(
+      collection(db, COLLECTION_NAME),
+      where('privado', '==', false),
+      orderBy('likeCount', 'desc'),
+      orderBy('fecha', 'desc')
+    );
+
+    const snapshot = await getDocs(q);
+
+    const instantes = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Instante[];
+
+    return instantes.slice(0, limit);
+  } catch (error) {
+    console.error('Error en getMostLikedInstantes:', error);
+    // Si falla por falta de índice compuesto, intentar sin ordenar por likeCount
+    try {
+      const q = query(
+        collection(db, COLLECTION_NAME),
+        where('privado', '==', false),
+        orderBy('fecha', 'desc')
+      );
+
+      const snapshot = await getDocs(q);
+
+      const instantes = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Instante[];
+
+      // Ordenar manualmente por likeCount
+      instantes.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+
+      return instantes.slice(0, limit);
+    } catch (fallbackError) {
+      console.error('Error en fallback de getMostLikedInstantes:', fallbackError);
+      return [];
+    }
+  }
 }
 
 // ==================== FIN NUEVAS FUNCIONES v0.5 ====================

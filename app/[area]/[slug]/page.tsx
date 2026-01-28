@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getAllInstantes, getInstantesByUser, getAreaInfo, Instante } from '@/lib/firestore';
+import { getAllInstantes, getInstantesByUser, getAreaInfo, Instante, toggleLike } from '@/lib/firestore';
 import { useAuth } from '@/lib/auth';
 import { remark } from 'remark';
 import html from 'remark-html';
@@ -23,8 +23,39 @@ export default function InstantePage() {
   const [loading, setLoading] = useState(true);
   const [isNotFound, setIsNotFound] = useState(false);
   const [zenMode, setZenMode] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [loadingLike, setLoadingLike] = useState(false);
 
   const areaInfo = getAreaInfo(areaId);
+
+  // Verificar si el usuario actual dio like
+  const userHasLiked = user && instante?.likes && instante.likes.includes(user.uid);
+
+  const handleLike = async () => {
+    if (!user || !instante?.id) {
+      return;
+    }
+
+    setLoadingLike(true);
+    try {
+      const result = await toggleLike(instante.id, user.uid);
+      setLikeCount(result.likeCount);
+      setIsLiked(result.liked);
+      // Actualizar el instante localmente
+      setInstante({
+        ...instante,
+        likes: result.liked
+          ? [...(instante.likes || []), user.uid]
+          : (instante.likes || []).filter(uid => uid !== user.uid),
+        likeCount: result.likeCount,
+      });
+    } catch (error) {
+      console.error('Error al dar like:', error);
+    } finally {
+      setLoadingLike(false);
+    }
+  };
 
   console.log('[InstantePage] Render - User:', user?.uid, 'loading:', loading, 'instante:', instante?.titulo);
 
@@ -90,6 +121,8 @@ export default function InstantePage() {
 
         console.log('[InstantePage] Encontrado:', found.titulo);
         setInstante(found);
+        setLikeCount(found.likeCount || 0);
+        setIsLiked(user?.uid && found.likes ? found.likes.includes(user.uid) : false);
 
         // Convertir Markdown a HTML
         const processedContent = await remark()
@@ -273,12 +306,41 @@ export default function InstantePage() {
               </h1>
 
               {/* Fecha */}
-              <time
-                dateTime={instante.fecha}
-                className="text-sm text-gray-400 dark:text-gray-500"
-              >
-                {format(new Date(instante.fecha), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
-              </time>
+              <div className="flex items-center justify-between">
+                <time
+                  dateTime={instante.fecha}
+                  className="text-sm text-gray-400 dark:text-gray-500"
+                >
+                  {format(new Date(instante.fecha), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+                </time>
+
+                {/* Botón de like */}
+                <button
+                  onClick={handleLike}
+                  disabled={!user || loadingLike}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    userHasLiked || isLiked
+                      ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  } ${!user ? 'cursor-not-allowed opacity-50' : ''} ${loadingLike ? 'opacity-70' : ''}`}
+                  title={user ? (userHasLiked || isLiked ? 'Quitar like' : 'Dar like') : 'Inicia sesión para dar like'}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill={userHasLiked || isLiked ? 'currentColor' : 'none'}
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                  <span>{likeCount}</span>
+                </button>
+              </div>
             </header>
           )}
 
