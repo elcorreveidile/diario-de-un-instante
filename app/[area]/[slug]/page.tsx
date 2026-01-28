@@ -21,7 +21,7 @@ export default function InstantePage() {
   const [instante, setInstante] = useState<Instante | null>(null);
   const [contentHtml, setContentHtml] = useState('');
   const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const [isNotFound, setIsNotFound] = useState(false);
   const [zenMode, setZenMode] = useState(false);
 
   const areaInfo = getAreaInfo(areaId);
@@ -35,7 +35,7 @@ export default function InstantePage() {
       if (cancelled) return;
 
       setLoading(true);
-      setNotFound(false);
+      setIsNotFound(false);
       setInstante(null);
 
       try {
@@ -83,7 +83,7 @@ export default function InstantePage() {
 
         if (!found) {
           console.log('[InstantePage] No encontrado');
-          setNotFound(true);
+          setIsNotFound(true);
           setLoading(false);
           return;
         }
@@ -103,7 +103,7 @@ export default function InstantePage() {
       } catch (error) {
         console.error('[InstantePage] Error:', error);
         if (!cancelled) {
-          setNotFound(true);
+          setIsNotFound(true);
           setLoading(false);
         }
       }
@@ -164,7 +164,7 @@ export default function InstantePage() {
     );
   }
 
-  if (notFound || !instante) {
+  if (isNotFound || !instante) {
     return (
       <div className="container-page max-w-3xl">
         <div className="text-center py-20">
@@ -184,7 +184,7 @@ export default function InstantePage() {
               [DEBUG] Buscando: {areaId}/{slug}
             </p>
             <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200 mb-2">
-              [DEBUG] notFound: {notFound.toString()}
+              [DEBUG] isNotFound: {isNotFound.toString()}
             </p>
             <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200 mb-2">
               [DEBUG] instante: {instante ? instante.titulo : 'null'}
