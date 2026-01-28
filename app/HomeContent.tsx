@@ -282,6 +282,18 @@ export default function HomeContent() {
         />
       </section>
 
+      {/* Grid de Áreas */}
+      <section>
+        <h2 className="section-title">
+          Las 11 áreas de mi vida
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {areas.map((area) => (
+            <AreaCard key={area.id} area={area} />
+          ))}
+        </div>
+      </section>
+
       {/* Newsletter */}
       <section className="mb-12">
         <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl border border-violet-200 dark:border-violet-800 p-8 sm:p-10">
@@ -376,18 +388,6 @@ export default function HomeContent() {
               </>
             )}
           </div>
-        </div>
-      </section>
-
-      {/* Grid de Áreas */}
-      <section>
-        <h2 className="section-title">
-          Las 11 áreas de mi vida
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {areas.map((area) => (
-            <AreaCard key={area.id} area={area} />
-          ))}
         </div>
       </section>
     </div>
