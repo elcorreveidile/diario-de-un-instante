@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { getBlogConfig, getUserByUsername, getPublicInstantesByUser } from '@/lib/firestore';
 import InstanteCard from '@/components/InstanteCard';
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: {
     username: string;
