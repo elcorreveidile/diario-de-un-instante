@@ -19,7 +19,7 @@ export async function GET() {
     }));
 
     console.log('[API Debug] Usuarios mapeados:', users.length);
-    console.log('[API Debug] Primer usuario (si existe):', users[0]?.email || 'N/A');
+    console.log('[API Debug] Primer usuario (si existe):', users.length > 0 ? (users[0] as any).email : 'N/A');
 
     return NextResponse.json(users);
 
