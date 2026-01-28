@@ -4,8 +4,6 @@ import withPWA from '@ducanh2912/next-pwa';
 const nextConfig = {
   // Configuración para leer archivos markdown en producción
   output: 'standalone',
-  // Excluir firebase-admin del bundling del cliente
-  serverExternalPackages: ['firebase-admin', 'firebase-admin/app', 'firebase-admin/firestore'],
 };
 
 export default withPWA({

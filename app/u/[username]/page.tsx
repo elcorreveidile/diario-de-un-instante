@@ -1,10 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getBlogConfig, getUserByUsername, getPublicInstantesByUser } from '@/lib/firestore-server';
 import InstanteCard from '@/components/InstanteCard';
 
-// Forzar renderizado dinámico - NO generar páginas estáticas
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -17,22 +15,23 @@ interface PageProps {
 // Generar metadata dinámica
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
-    const user = await getUserByUsername(params.username);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/user/${params.username}`, {
+      cache: 'no-store',
+    });
 
-    if (!user) {
+    if (!res.ok) {
       return {
         title: 'Usuario no encontrado - Diario de un Instante',
       };
     }
 
-    const blogConfig = await getBlogConfig(user.uid);
+    const user = await res.json();
 
     return {
-      title: `${blogConfig?.displayName || user.displayName || params.username} - Diario de un Instante`,
-      description: blogConfig?.bio || `Los instantes públicos de ${blogConfig?.displayName || user.displayName || params.username}`,
+      title: `${user.displayName || params.username} - Diario de un Instante`,
+      description: user.bio || `Los instantes públicos de ${user.displayName || params.username}`,
     };
   } catch (error) {
-    console.error('[Metadata] Error:', error);
     return {
       title: 'Diario de un Instante',
     };
@@ -40,91 +39,52 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function UserProfilePage({ params }: PageProps) {
-  let user = null;
-  let blogConfig = null;
-  let instantes: any[] = [];
-  let error = null;
+  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000';
 
-  try {
-    console.log('[UserProfile] Buscando usuario:', params.username);
+  // Obtener datos del usuario
+  const userRes = await fetch(`${baseUrl}/api/user/${params.username}`, {
+    cache: 'no-store',
+  });
 
-    // Buscar usuario por username
-    user = await getUserByUsername(params.username);
-
-    console.log('[UserProfile] Usuario encontrado:', user ? `${user.uid} (${user.displayName})` : 'null');
-
-    if (!user) {
-      console.log('[UserProfile] Usuario no encontrado');
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Usuario no encontrado</h1>
-            <p className="text-gray-600 mb-6">
-              El usuario <strong>{params.username}</strong> no existe o ha sido eliminado.
-            </p>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg"
-            >
-              Volver al inicio
-            </Link>
-          </div>
-        </div>
-      );
-    }
-
-    // Obtener configuración del blog
-    blogConfig = await getBlogConfig(user.uid);
-    console.log('[UserProfile] Blog config:', blogConfig);
-
-    // Obtener instantes públicos del usuario
-    instantes = await getPublicInstantesByUser(user.uid);
-    console.log('[UserProfile] Instantes encontrados:', instantes.length);
-
-  } catch (err) {
-    console.error('[UserProfile] Error:', err);
-    error = err;
-
-    // Mostrar página de error con información
+  if (!userRes.ok) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error al cargar el perfil</h1>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Usuario no encontrado</h1>
           <p className="text-gray-600 mb-6">
-            Ha ocurrido un error al intentar cargar el blog del usuario.
-            Por favor, intenta nuevamente más tarde.
+            El usuario <strong>{params.username}</strong> no existe o ha sido eliminado.
           </p>
-          <div className="space-y-2">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg w-full justify-center"
-            >
-              Volver al inicio
-            </Link>
-          </div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg"
+          >
+            Volver al inicio
+          </Link>
         </div>
       </div>
     );
   }
 
-  // Si todo está bien, renderizar el blog
-  const primaryColor = blogConfig?.primaryColor || '#8b5cf6';
-  const secondaryColor = blogConfig?.secondaryColor || '#f5f3ff';
+  const user = await userRes.json();
+
+  // Obtener instantes del usuario
+  const instantesRes = await fetch(`${baseUrl}/api/user/${params.username}/instantes`, {
+    cache: 'no-store',
+  });
+  const instantes = instantesRes.ok ? await instantesRes.json() : [];
+
+  const primaryColor = user.primaryColor || '#8b5cf6';
+  const secondaryColor = user.secondaryColor || '#f5f3ff';
 
   return (
     <div className="min-h-screen">
       {/* Cabecera del blog */}
       <div className="relative">
         {/* Foto de cabecera */}
-        {blogConfig?.headerPhotoURL ? (
+        {user.headerPhotoURL ? (
           <div className="w-full h-48 sm:h-64 relative">
             <img
-              src={blogConfig.headerPhotoURL}
+              src={user.headerPhotoURL}
               alt="Cabecera"
               className="w-full h-full object-cover"
             />
@@ -141,10 +101,10 @@ export default async function UserProfilePage({ params }: PageProps) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative -mt-16 sm:-mt-20 mb-6 flex items-end gap-6">
             {/* Avatar */}
-            {blogConfig?.photoURL ? (
+            {user.photoURL ? (
               <img
-                src={blogConfig.photoURL}
-                alt={blogConfig.displayName}
+                src={user.photoURL}
+                alt={user.displayName}
                 className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-white shadow-xl"
               />
             ) : (
@@ -152,17 +112,17 @@ export default async function UserProfilePage({ params }: PageProps) {
                 className="w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center text-white text-4xl sm:text-5xl font-bold shadow-xl border-4 border-white"
                 style={{ backgroundColor: primaryColor }}
               >
-                {(blogConfig?.displayName || user.displayName || '?').charAt(0).toUpperCase()}
+                {(user.displayName || '?').charAt(0).toUpperCase()}
               </div>
             )}
 
             {/* Nombre y bio */}
             <div className="flex-1 pb-2">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                Diario de un Instante de {blogConfig?.displayName || user.displayName}
+                Diario de un Instante de {user.displayName}
               </h1>
-              {blogConfig?.bio && (
-                <p className="text-gray-600 dark:text-gray-400 mt-2">{blogConfig.bio}</p>
+              {user.bio && (
+                <p className="text-gray-600 dark:text-gray-400 mt-2">{user.bio}</p>
               )}
             </div>
           </div>
@@ -198,7 +158,7 @@ export default async function UserProfilePage({ params }: PageProps) {
               Sin instantes públicos
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              {blogConfig?.displayName || user.displayName} aún no ha publicado ningún instante público.
+              {user.displayName} aún no ha publicado ningún instante público.
             </p>
           </div>
         ) : (
@@ -210,7 +170,7 @@ export default async function UserProfilePage({ params }: PageProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-              {instantes.map((instante) => (
+              {instantes.map((instante: any) => (
                 <InstanteCard
                   key={instante.id}
                   instante={instante}
