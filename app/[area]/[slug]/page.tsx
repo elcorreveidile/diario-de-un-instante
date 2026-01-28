@@ -135,13 +135,56 @@ export default function InstantePage() {
         <div className="text-center py-20">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 dark:border-white mx-auto"></div>
           <p className="mt-4 text-gray-500 dark:text-gray-400">Cargando instante...</p>
+          {/* Debug info */}
+          <div className="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-left">
+            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200">
+              [DEBUG] Usuario: {user?.uid || 'no autenticado'}
+            </p>
+            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200">
+              [DEBUG] Buscando: {areaId}/{slug}
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   if (notFoundState || !instante) {
-    notFound();
+    return (
+      <div className="container-page max-w-3xl">
+        <div className="text-center py-20">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Página no encontrada
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            El instante que buscas no existe o ha sido movido. Quizás este momento aún está por escribirse.
+          </p>
+
+          {/* Debug info */}
+          <div className="max-w-md mx-auto p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-left mb-6">
+            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200 mb-2">
+              [DEBUG] Usuario: {user?.uid || 'no autenticado'}
+            </p>
+            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200 mb-2">
+              [DEBUG] Buscando: {areaId}/{slug}
+            </p>
+            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200 mb-2">
+              [DEBUG] notFoundState: {notFoundState.toString()}
+            </p>
+            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200 mb-2">
+              [DEBUG] instante existe: {instante ? 'SÍ' : 'NO'}
+            </p>
+          </div>
+
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg"
+          >
+            Volver al inicio
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
