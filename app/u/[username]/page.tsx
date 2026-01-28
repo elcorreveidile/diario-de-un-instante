@@ -4,14 +4,9 @@ import Link from 'next/link';
 import { getBlogConfig, getUserByUsername, getPublicInstantesByUser } from '@/lib/firestore';
 import InstanteCard from '@/components/InstanteCard';
 
+// Forzar renderizado dinámico - NO generar páginas estáticas
 export const dynamic = 'force-dynamic';
-export const dynamicParams = true;
 export const revalidate = 0;
-
-// No pre-generar ninguna página estática
-export async function generateStaticParams() {
-  return [];
-}
 
 interface PageProps {
   params: {
@@ -21,29 +16,23 @@ interface PageProps {
 
 // Generar metadata dinámica
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  // Durante build, retornar metadata genérica
-  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'test') {
-    return {
-      title: 'Diario de un Instante',
-    };
-  }
-
   try {
     const user = await getUserByUsername(params.username);
 
     if (!user) {
       return {
-        title: 'Usuario no encontrado',
+        title: 'Usuario no encontrado - Diario de un Instante',
       };
     }
 
     const blogConfig = await getBlogConfig(user.uid);
 
     return {
-      title: `Diario de un Instante de ${blogConfig?.displayName || user.displayName || params.username}`,
+      title: `${blogConfig?.displayName || user.displayName || params.username} - Diario de un Instante`,
       description: blogConfig?.bio || `Los instantes públicos de ${blogConfig?.displayName || user.displayName || params.username}`,
     };
   } catch (error) {
+    console.error('[Metadata] Error:', error);
     return {
       title: 'Diario de un Instante',
     };
@@ -51,39 +40,79 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function UserProfilePage({ params }: PageProps) {
-  // Saltar durante build time
-  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'test') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Cargando perfil...</p>
-      </div>
-    );
-  }
+  let user = null;
+  let blogConfig = null;
+  let instantes: any[] = [];
+  let error = null;
 
   try {
     console.log('[UserProfile] Buscando usuario:', params.username);
 
     // Buscar usuario por username
-    const user = await getUserByUsername(params.username);
+    user = await getUserByUsername(params.username);
 
     console.log('[UserProfile] Usuario encontrado:', user ? `${user.uid} (${user.displayName})` : 'null');
 
     if (!user) {
-      console.log('[UserProfile] Usuario no encontrado, mostrando 404');
-      notFound();
+      console.log('[UserProfile] Usuario no encontrado');
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Usuario no encontrado</h1>
+            <p className="text-gray-600 mb-6">
+              El usuario <strong>{params.username}</strong> no existe o ha sido eliminado.
+            </p>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg"
+            >
+              Volver al inicio
+            </Link>
+          </div>
+        </div>
+      );
     }
 
     // Obtener configuración del blog
-    const blogConfig = await getBlogConfig(user.uid);
-
+    blogConfig = await getBlogConfig(user.uid);
     console.log('[UserProfile] Blog config:', blogConfig);
 
     // Obtener instantes públicos del usuario
-    const instantes = await getPublicInstantesByUser(user.uid);
-
+    instantes = await getPublicInstantesByUser(user.uid);
     console.log('[UserProfile] Instantes encontrados:', instantes.length);
 
-    // Aplicar colores personalizados
+  } catch (err) {
+    console.error('[UserProfile] Error:', err);
+    error = err;
+
+    // Mostrar página de error con información
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error al cargar el perfil</h1>
+          <p className="text-gray-600 mb-6">
+            Ha ocurrido un error al intentar cargar el blog del usuario.
+            Por favor, intenta nuevamente más tarde.
+          </p>
+          <div className="space-y-2">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg w-full justify-center"
+            >
+              Volver al inicio
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Si todo está bien, renderizar el blog
   const primaryColor = blogConfig?.primaryColor || '#8b5cf6';
   const secondaryColor = blogConfig?.secondaryColor || '#f5f3ff';
 
@@ -129,9 +158,7 @@ export default async function UserProfilePage({ params }: PageProps) {
 
             {/* Nombre y bio */}
             <div className="flex-1 pb-2">
-              <h1
-                className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white"
-              >
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                 Diario de un Instante de {blogConfig?.displayName || user.displayName}
               </h1>
               {blogConfig?.bio && (
@@ -211,8 +238,4 @@ export default async function UserProfilePage({ params }: PageProps) {
       </footer>
     </div>
   );
-} catch (error) {
-  console.error('Error loading user profile:', error);
-  notFound();
-}
 }
