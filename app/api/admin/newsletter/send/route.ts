@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase-admin';
-import { getActiveSubscribers } from '@/lib/newsletter';
+import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { generateNewsletterHTML, sendNewsletter } from '@/lib/email';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 const NEWSLETTERS_SENT_COLLECTION = 'newsletters_sent';
 
@@ -35,8 +32,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Obtener suscriptores activos
-    const subscribers = await getActiveSubscribers();
+    // Obtener suscriptores activos usando Admin SDK
+    const snapshot = await adminDb
+      .collection('newsletter')
+      .where('status', '==', 'active')
+      .get();
+
+    const subscribers = snapshot.docs.map(doc => ({
+      email: doc.data().email,
+    }));
 
     if (subscribers.length === 0) {
       return NextResponse.json(
@@ -59,14 +63,14 @@ export async function POST(request: NextRequest) {
     const emails = subscribers.map((s) => s.email);
     const result = await sendNewsletter(emails, subject, htmlContent, 'dummy');
 
-    // Guardar registro en Firestore
-    await addDoc(collection(db, NEWSLETTERS_SENT_COLLECTION), {
+    // Guardar registro en Firestore usando Admin SDK
+    await adminDb.collection(NEWSLETTERS_SENT_COLLECTION).add({
       subject,
       content,
       sentTo: emails.length,
       successful: result.successful,
       failed: result.failed,
-      sentAt: serverTimestamp(),
+      sentAt: new Date(),
     });
 
     return NextResponse.json({

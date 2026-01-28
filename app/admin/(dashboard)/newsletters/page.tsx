@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getActiveSubscribers } from '@/lib/newsletter';
+import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
 
 interface Subscriber {
@@ -12,6 +12,7 @@ interface Subscriber {
 }
 
 export default function NewslettersPage() {
+  const { user } = useAuth();
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,9 +27,22 @@ export default function NewslettersPage() {
   }, []);
 
   const loadSubscribers = async () => {
+    if (!user) return;
+
     try {
-      const data = await getActiveSubscribers();
-      setSubscribers(data);
+      const token = await user.getIdToken();
+      const response = await fetch('/api/admin/newsletter/subscribers', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSubscribers(data.subscribers);
+      } else {
+        console.error('Error cargando suscriptores:', response.statusText);
+      }
     } catch (error) {
       console.error('Error cargando suscriptores:', error);
     } finally {
@@ -44,13 +58,22 @@ export default function NewslettersPage() {
       return;
     }
 
+    if (!user) {
+      setSendResult({ success: false, message: 'No autorizado' });
+      return;
+    }
+
     setSending(true);
     setSendResult(null);
 
     try {
+      const token = await user.getIdToken();
       const response = await fetch('/api/admin/newsletter/send', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ subject, content }),
       });
 
