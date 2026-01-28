@@ -1,8 +1,6 @@
 import { Metadata } from 'next';
 import HomeContent from './HomeContent';
 
-export const runtime = 'edge';
-
 // Generar metadata para la home
 export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = 'https://www.diariodeuninstante.com';

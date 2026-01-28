@@ -14,6 +14,9 @@ interface PageProps {
 // Generar metadata estática para SEO y Open Graph
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { area, slug } = params;
+  const baseUrl = 'https://www.diariodeuninstante.com';
+
+  console.log('[generateMetadata] Buscando instante:', area, slug);
 
   try {
     // Buscar el instante en el servidor usando Admin SDK
@@ -24,7 +27,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       .limit(1)
       .get();
 
+    console.log('[generateMetadata] Snapshot size:', snapshot.size);
+
     if (snapshot.empty) {
+      console.log('[generateMetadata] No encontrado');
       return {
         title: 'Instante no encontrado - Diario de un Instante',
       };
@@ -37,12 +43,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     } as any;
 
     const areaInfo = getAreaInfo(area);
-    const baseUrl = 'https://www.diariodeuninstante.com';
     const ogImageUrl = `${baseUrl}/api/og/instante/${doc.id}`;
     const title = instante.titulo;
     const description = instante.content
       .replace(/[#*`\[\]]/g, '')
       .substring(0, 150) + '...';
+
+    console.log('[generateMetadata] Generando metadata para:', title);
 
     return {
       title: `${title} | ${areaInfo?.nombre || ''} - Diario de un Instante`,
@@ -70,7 +77,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       },
     };
   } catch (error) {
-    console.error('Error en generateMetadata:', error);
+    console.error('[generateMetadata] Error:', error);
     return {
       title: 'Diario de un Instante',
     };
