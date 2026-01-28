@@ -6,7 +6,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getAllInstantes, getAreaInfo, Instante } from '@/lib/firestore';
+import { getAllInstantes, getInstantesByUser, getAreaInfo, Instante } from '@/lib/firestore';
+import { useAuth } from '@/lib/auth';
 import { remark } from 'remark';
 import html from 'remark-html';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -15,6 +16,7 @@ export default function InstantePage() {
   const params = useParams();
   const areaId = params.area as string;
   const slug = params.slug as string;
+  const { user } = useAuth();
 
   const [instante, setInstante] = useState<Instante | null>(null);
   const [contentHtml, setContentHtml] = useState('');
@@ -27,14 +29,28 @@ export default function InstantePage() {
   useEffect(() => {
     const loadInstante = async () => {
       try {
-        const allInstantes = await getAllInstantes();
-        // Filtrar: por área Y slug Y (públicos O sin campo privado) Y (publicados O sin campo estado)
+        let allInstantes: Instante[];
+
+        // Si hay usuario logueado, obtener sus instantes (incluyendo privados)
+        if (user?.uid) {
+          const userInstantes = await getInstantesByUser(user.uid);
+          // Obtener también los instantes públicos de otros usuarios
+          const publicInstantes = await getAllInstantes();
+          // Combinar sin duplicados
+          allInstantes = [...userInstantes, ...publicInstantes.filter(i => !userInstantes.find(ui => ui.id === i.id))];
+        } else {
+          // Si no hay usuario logueado, solo obtener instantes públicos
+          allInstantes = await getAllInstantes();
+        }
+
+        // Filtrar: por área Y slug Y ((públicos O sin campo privado) O (pertenece al usuario))
         const instante = allInstantes.find(i => {
           const matchArea = i.area === areaId;
           const matchSlug = i.slug === slug;
           const esPublico = i.privado === false || !i.hasOwnProperty('privado');
           const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
-          return matchArea && matchSlug && esPublico && esVisible;
+          const esDelUsuario = user?.uid && i.userId === user.uid;
+          return matchArea && matchSlug && (esPublico || esDelUsuario) && esVisible;
         });
 
         if (!instante) {
@@ -60,7 +76,7 @@ export default function InstantePage() {
     };
 
     loadInstante();
-  }, [areaId, slug]);
+  }, [areaId, slug, user]);
 
   // Atajo de teclado: Cmd/Ctrl + Shift + Z para modo zen
   useHotkeys('mod+shift+z', () => {
