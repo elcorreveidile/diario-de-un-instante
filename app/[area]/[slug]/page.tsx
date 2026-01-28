@@ -21,27 +21,27 @@ export default function InstantePage() {
   const [instante, setInstante] = useState<Instante | null>(null);
   const [contentHtml, setContentHtml] = useState('');
   const [loading, setLoading] = useState(true);
-  const [notFoundState, setNotFoundState] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [zenMode, setZenMode] = useState(false);
 
   const areaInfo = getAreaInfo(areaId);
 
-  // Log temprano para verificar autenticación
-  console.log('[InstantePage] Componente montado');
-  console.log('[InstantePage] User auth:', user ? { uid: user.uid, email: user.email } : null);
-  console.log('[InstantePage] Buscando:', { areaId, slug });
+  console.log('[InstantePage] Render - User:', user?.uid, 'loading:', loading, 'instante:', instante?.titulo);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadInstante = async () => {
-      // Resetear estados al inicio
-      setNotFoundState(false);
-      setInstante(null);
+      if (cancelled) return;
+
       setLoading(true);
+      setNotFound(false);
+      setInstante(null);
 
       try {
         let allInstantes: Instante[];
 
-        console.log('[InstantePage] Usuario:', user?.uid, 'Buscando:', areaId, slug);
+        console.log('[InstantePage] Cargando - User:', user?.uid, 'Buscando:', areaId, slug);
 
         // Si hay usuario logueado, obtener sus instantes (incluyendo privados)
         if (user?.uid) {
@@ -58,8 +58,8 @@ export default function InstantePage() {
 
         console.log('[InstantePage] Total instantes:', allInstantes.length);
 
-        // Filtrar: por área Y slug Y ((públicos O sin campo privado) O (pertenece al usuario))
-        const instante = allInstantes.find(i => {
+        // Buscar el instante
+        const found = allInstantes.find(i => {
           const matchArea = i.area === areaId;
           const matchSlug = i.slug === slug;
           const esPublico = i.privado === false || !i.hasOwnProperty('privado');
@@ -79,33 +79,42 @@ export default function InstantePage() {
           return matchArea && matchSlug && (esPublico || esDelUsuario) && esVisible;
         });
 
-        if (!instante) {
+        if (cancelled) return;
+
+        if (!found) {
           console.log('[InstantePage] No encontrado');
-          setNotFoundState(true);
+          setNotFound(true);
           setLoading(false);
           return;
         }
-        console.log('[InstantePage] Encontrado:', instante.titulo);
-        setInstante(instante);
+
+        console.log('[InstantePage] Encontrado:', found.titulo);
+        setInstante(found);
 
         // Convertir Markdown a HTML
         const processedContent = await remark()
           .use(html)
-          .process(instante.content);
-        let contentHtml = processedContent.toString();
-        // Añadir target="_blank" y rel="noopener" a todos los enlaces
-        contentHtml = contentHtml.replace(/<a href=/g, '<a target="_blank" rel="noopener" href=');
-        setContentHtml(contentHtml);
-      } catch (error) {
-        console.error('Error cargando instante:', error);
-        setNotFoundState(true);
-      } finally {
+          .process(found.content);
+        let html = processedContent.toString();
+        html = html.replace(/<a href=/g, '<a target="_blank" rel="noopener" href=');
+        setContentHtml(html);
         setLoading(false);
+
+      } catch (error) {
+        console.error('[InstantePage] Error:', error);
+        if (!cancelled) {
+          setNotFound(true);
+          setLoading(false);
+        }
       }
     };
 
     loadInstante();
-  }, [areaId, slug, user]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [areaId, slug, user?.uid]); // Solo dependemos de user.uid, no del objeto user completo
 
   // Atajo de teclado: Cmd/Ctrl + Shift + Z para modo zen
   useHotkeys('mod+shift+z', () => {
@@ -144,7 +153,7 @@ export default function InstantePage() {
           {/* Debug info */}
           <div className="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-left">
             <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200">
-              [DEBUG] Usuario: {user?.uid || 'no autenticado'}
+              [DEBUG] Usuario: {user?.uid || 'cargando auth...'}
             </p>
             <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200">
               [DEBUG] Buscando: {areaId}/{slug}
@@ -155,7 +164,7 @@ export default function InstantePage() {
     );
   }
 
-  if (notFoundState || !instante) {
+  if (notFound || !instante) {
     return (
       <div className="container-page max-w-3xl">
         <div className="text-center py-20">
@@ -175,10 +184,10 @@ export default function InstantePage() {
               [DEBUG] Buscando: {areaId}/{slug}
             </p>
             <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200 mb-2">
-              [DEBUG] notFoundState: {notFoundState.toString()}
+              [DEBUG] notFound: {notFound.toString()}
             </p>
             <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200 mb-2">
-              [DEBUG] instante existe: {instante ? 'SÍ' : 'NO'}
+              [DEBUG] instante: {instante ? instante.titulo : 'null'}
             </p>
           </div>
 
@@ -188,30 +197,6 @@ export default function InstantePage() {
           >
             Volver al inicio
           </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // Mostrar pantalla de carga si user es null (auth no listo)
-  if (loading || !user) {
-    return (
-      <div className="container-page max-w-3xl">
-        <div className="text-center py-20">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 dark:border-white mx-auto"></div>
-          <p className="mt-4 text-gray-500 dark:text-gray-400">Cargando instante...</p>
-          {/* Debug info */}
-          <div className="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-left">
-            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200">
-              [DEBUG] Usuario: {user?.uid || 'no autenticado (cargando...)'}
-            </p>
-            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200">
-              [DEBUG] Buscando: {areaId}/{slug}
-            </p>
-            <p className="text-xs font-mono text-yellow-800 dark:text-yellow-200">
-              [DEBUG] Estado: {loading ? 'loading' : 'ready'} | User: {user ? 'auténtico' : 'null'}
-            </p>
-          </div>
         </div>
       </div>
     );
