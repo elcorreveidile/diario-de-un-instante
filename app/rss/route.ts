@@ -47,7 +47,6 @@ export async function GET() {
           <guid isPermaLink="true">${baseUrl}/${instante.area}/${instante.slug}</guid>
           <pubDate>${pubDate}</pubDate>
           <category><![CDATA[${instante.area}]]></category>
-          <author>${instante.userId}</author>
         </item>
       `.trim();
     }).join('\n');

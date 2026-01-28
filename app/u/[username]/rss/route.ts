@@ -70,7 +70,6 @@ export async function GET(request: Request, { params }: RouteParams) {
           <guid isPermaLink="true">${baseUrl}/${instante.area}/${instante.slug}</guid>
           <pubDate>${pubDate}</pubDate>
           <category><![CDATA[${areaInfo?.nombre || instante.area}]]></category>
-          <author>${userId}</author>
         </item>
       `.trim();
     }).join('\n');
