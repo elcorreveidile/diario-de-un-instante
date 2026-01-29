@@ -304,7 +304,7 @@ export default function HomeContent() {
 
       {/* Newsletter - Solo mostrar si no hay usuario logueado */}
       {!user && (
-        <section className="mb-12">
+        <section className="mt-12 mb-12">
           <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl border border-violet-200 dark:border-violet-800 p-8 sm:p-10">
             <div className="text-center max-w-2xl mx-auto">
             {!showNewsletterForm ? (
