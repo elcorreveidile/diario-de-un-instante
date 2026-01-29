@@ -163,6 +163,16 @@ export const AREAS = [
 
 export type AreaId = typeof AREAS[number]['id'];
 
+// v0.7 - Metadata para imágenes almacenadas
+export interface ImageMetadata {
+  url: string;           // URL de descarga de Firebase Storage
+  path: string;          // Ruta en Storage (para borrado)
+  name: string;          // Nombre original del archivo
+  size: number;          // Tamaño en bytes
+  type: string;          // MIME type (image/jpeg, etc.)
+  uploadedAt: Date;      // Timestamp de subida
+}
+
 // Interfaz para un Instante
 export interface Instante {
   id?: string;
@@ -182,6 +192,8 @@ export interface Instante {
   likeCount?: number; // Contador de likes (para ordenamiento)
   // v0.7 - Tags
   tags?: string[]; // Array de tags personalizados (ej: ['productividad', 'reflexión'])
+  // v0.7 - Imágenes
+  images?: ImageMetadata[]; // Array de imágenes (máximo 5 por instante)
 }
 
 // Interfaz para crear/actualizar
@@ -196,6 +208,7 @@ export interface InstanteInput {
   estado: 'borrador' | 'publicado';
   privado: boolean;
   tags?: string[]; // v0.7 - Tags personalizados
+  images?: ImageMetadata[]; // v0.7 - Imágenes
 }
 
 // Interfaz para el área con su último instante

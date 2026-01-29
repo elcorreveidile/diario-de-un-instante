@@ -1,5 +1,6 @@
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from './firebase';
+import { ImageMetadata } from './firestore';
 
 /**
  * Sube una imagen a Firebase Storage
@@ -68,4 +69,77 @@ export async function uploadHeaderPhoto(userId: string, file: File): Promise<str
   const filename = `${userId}_header_${timestamp}.${extension}`;
 
   return uploadImage(file, `headers/${filename}`);
+}
+
+/**
+ * Sube imágenes de un instante (1-5 imágenes)
+ * @param userId ID del usuario
+ * @param instanteId ID del instante
+ * @param files Archivos a subir (máximo 5)
+ * @returns Array de metadata de imágenes
+ */
+export async function uploadInstanteImages(
+  userId: string,
+  instanteId: string,
+  files: File[]
+): Promise<ImageMetadata[]> {
+  if (files.length > 5) {
+    throw new Error('Máximo 5 imágenes por instante');
+  }
+
+  const results: ImageMetadata[] = [];
+
+  for (const file of files) {
+    // Validaciones
+    if (!file.type.startsWith('image/')) {
+      throw new Error(`El archivo ${file.name} debe ser una imagen`);
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error(`La imagen ${file.name} supera los 5MB`);
+    }
+
+    // Generar nombre único
+    const timestamp = Date.now();
+    const extension = file.name.split('.').pop();
+    const filename = `${userId}_${instanteId}_${timestamp}.${extension}`;
+    const path = `instantes/${userId}/${filename}`;
+
+    try {
+      const url = await uploadImage(file, path);
+
+      results.push({
+        url,
+        path,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        uploadedAt: new Date(),
+      });
+    } catch (error) {
+      console.error(`Error subiendo ${file.name}:`, error);
+      throw error;
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Elimina una imagen de Firebase Storage
+ * @param path Ruta en Storage
+ */
+export async function deleteInstanteImage(path: string): Promise<void> {
+  const imageRef = ref(storage, path);
+  await deleteObject(imageRef);
+}
+
+/**
+ * Elimina todas las imágenes de un instante
+ * @param images Array de metadata de imágenes
+ */
+export async function deleteAllInstanteImages(images: ImageMetadata[]): Promise<void> {
+  await Promise.all(
+    images.map(img => deleteInstanteImage(img.path))
+  );
 }
