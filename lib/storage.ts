@@ -107,16 +107,11 @@ export async function uploadInstanteImages(
 
     try {
       // Subir archivo
-      await uploadBytes(ref(storage, path), file);
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, file);
 
-      // Construir URL permanente sin token (usando alt=media)
-      // Formato: https://firebasestorage.googleapis.com/v0/b/bucket/o/path?alt=media
-      // Convertir de .firebasestorage.app a .appspot.com si es necesario
-      let bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'diario-de-un-instante.appspot.com';
-      bucketName = bucketName.replace('.firebasestorage.app', '.appspot.com');
-
-      const encodedPath = path.split('/').map(encodeURIComponent).join('/');
-      const url = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodedPath}?alt=media`;
+      // Obtener URL de descarga usando Firebase SDK (genera URL correcta automáticamente)
+      const url = await getDownloadURL(storageRef);
 
       results.push({
         url,
