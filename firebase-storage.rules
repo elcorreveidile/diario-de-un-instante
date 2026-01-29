@@ -1,0 +1,72 @@
+// Reglas de Seguridad para Firebase Storage
+// Archivo: firebase-storage.rules
+//
+// CÓMO CONFIGURAR:
+// 1. Ir a Firebase Console: https://console.firebase.google.com/
+// 2. Seleccionar proyecto: diario-de-un-instante
+// 3. Ir a Storage > Rules (en el menú izquierdo)
+// 4. Copiar y pegar estas reglas
+// 5. Click en "Publish"
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ========================================
+    // AVATARES - Fotos de perfil de usuario
+    // ========================================
+    match /avatars/{allPaths=**} {
+      // Cualquiera puede leer avatares (públicos)
+      allow read: if true;
+
+      // Solo el usuario puede subir su propio avatar
+      allow write: if request.auth != null &&
+                     request.auth.uid == userIdAvatar();
+    }
+
+    // ========================================
+    // HEADERS - Fotos de cabecera de blog
+    // ========================================
+    match /headers/{allPaths=**} {
+      // Cualquiera puede leer headers (públicos)
+      allow read: if true;
+
+      // Solo el usuario puede subir su propio header
+      allow write: if request.auth != null &&
+                     userIdHeader() == request.auth.uid;
+    }
+
+    // ========================================
+    // INSTANTES - Imágenes de instantes (v0.7)
+    // ========================================
+    match /instantes/{userId}/{allPaths=**} {
+      // Cualquiera puede leer imágenes de instantes (públicas)
+      allow read: if true;
+
+      // Solo el usuario puede subir imágenes a su carpeta
+      allow write: if request.auth != null &&
+                     request.auth.uid == userId;
+
+      // Validar que sea una imagen
+      && request.resource.matches(/[.](jpg|jpeg|png|gif|webp)$/i);
+
+      // Validar tamaño máximo (5MB = 5 * 1024 * 1024 bytes)
+      && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // ========================================
+    // FUNCIONES AUXILIARES
+    // ========================================
+    // Extraer userId del nombre de archivo de avatar
+    // Formato: {userId}_{timestamp}.{ext}
+    function userIdAvatar() {
+      return request.path.name.split('_')[0];
+    }
+
+    // Extraer userId del nombre de archivo de header
+    // Formato: {userId}_header_{timestamp}.{ext}
+    function userIdHeader() {
+      return request.path.name.split('_')[0];
+    }
+  }
+}

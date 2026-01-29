@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getAllInstantes, getInstantesByUser, Instante, toggleLike, ImageMetadata } from '@/lib/firestore';
@@ -360,12 +359,10 @@ export default function InstanteContent({ areaId, slug }: InstanteContentProps) 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {instante.images.map((img, idx) => (
                   <div key={idx} className="relative group">
-                    <Image
+                    <img
                       src={img.url}
                       alt={img.name}
-                      width={800}
-                      height={600}
-                      className="rounded-lg border border-gray-200 dark:border-gray-700"
+                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700"
                       loading="lazy"
                     />
                   </div>
