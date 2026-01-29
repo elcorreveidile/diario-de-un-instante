@@ -104,8 +104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return unsubscribe;
   }, [mounted]);
 
-  // Helper: Verificar y usar código de invitación
-  const verifyAndUseInviteCode = async (inviteCode: string, email: string) => {
+  // Helper: Verificar y usar código de invitación, retorna el ID de la invitación
+  const verifyAndUseInviteCode = async (inviteCode: string, email: string): Promise<string> => {
     if (!inviteCode) {
       throw new Error('Se requiere un código de invitación para registrarse');
     }
@@ -122,18 +122,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const inviteDoc = inviteSnapshot.docs[0];
+    const inviteId = inviteDoc.id;
+
     // Marcar como usado
-    await updateDoc(doc(db, 'invites', inviteDoc.id), {
+    await updateDoc(doc(db, 'invites', inviteId), {
       used: true,
       usedBy: email,
       usedAt: new Date(),
     });
+
+    return inviteId;
   };
 
   // Helper: Crear perfil de usuario en Firestore
   const createUserProfile = async (
     userCredential: UserCredential,
-    displayName?: string
+    displayName?: string,
+    inviteId?: string
   ) => {
     const user = userCredential.user;
     const email = user.email!;
@@ -143,24 +148,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!userDoc.exists()) {
       // Crear perfil si no existe
-      await setDoc(doc(db, 'users', user.uid), {
+      const profileData: any = {
         email,
         displayName: displayName || user.displayName || '',
         role: 'user',
         createdAt: new Date(),
         emailVerified: user.emailVerified,
-      });
+      };
+
+      // Guardar el ID de la invitación usada
+      if (inviteId) {
+        profileData.inviteId = inviteId;
+      }
+
+      await setDoc(doc(db, 'users', user.uid), profileData);
+    } else if (inviteId && !userDoc.data().inviteId) {
+      // Si el perfil existe pero no tiene inviteId, actualizarlo (por compatibilidad)
+      await updateDoc(doc(db, 'users', user.uid), { inviteId });
     }
   };
 
   const signUp = async (email: string, password: string, displayName?: string, inviteCode?: string) => {
-    // Verificar código de invitación
-    await verifyAndUseInviteCode(inviteCode!, email);
+    // Verificar código de invitación y obtener ID
+    const inviteId = await verifyAndUseInviteCode(inviteCode!, email);
 
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-    // Crear perfil en Firestore
-    await createUserProfile(userCredential, displayName);
+    // Crear perfil en Firestore con el ID de la invitación
+    await createUserProfile(userCredential, displayName, inviteId);
 
     // Enviar email de verificación
     if (!userCredential.user.emailVerified) {
@@ -169,7 +184,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const result = await signInWithEmailAndPassword(auth, email, password);
+
+    // Verificar si el usuario tiene invitación válida O es admin
+    const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const isAdmin = userData.role === 'admin';
+
+      // Si no es admin y no tiene inviteId, denegar acceso
+      if (!isAdmin && !userData.inviteId) {
+        await signOut(auth);
+        throw new Error('USER_NO_VALID_INVITE');
+      }
+    }
   };
 
   // Google Auth
@@ -182,18 +211,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const userDoc = await getDoc(doc(db, 'users', uid));
     const isNewUser = !userDoc.exists();
 
-    // Si es un usuario nuevo, verificar código de invitación
+    let inviteId: string | undefined;
+
     if (isNewUser) {
+      // Usuario nuevo - requerir código de invitación
       if (!inviteCode || inviteCode.trim() === '') {
-        // Hacer logout para no dejar el usuario autenticado sin código
         await signOut(auth);
         throw new Error('NEW_USER_NO_INVITE');
       }
-      await verifyAndUseInviteCode(inviteCode, email);
+      inviteId = await verifyAndUseInviteCode(inviteCode, email);
+    } else {
+      // Usuario existente - verificar si tiene invitación válida O es admin
+      const userData = userDoc.data();
+      const isAdmin = userData.role === 'admin';
+
+      // Si no es admin y no tiene inviteId, denegar acceso
+      if (!isAdmin && !userData.inviteId) {
+        await signOut(auth);
+        throw new Error('USER_NO_VALID_INVITE');
+      }
     }
 
     // Crear o actualizar perfil
-    await createUserProfile(result);
+    await createUserProfile(result, undefined, inviteId);
   };
 
   // Apple Auth
@@ -206,18 +246,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const userDoc = await getDoc(doc(db, 'users', uid));
     const isNewUser = !userDoc.exists();
 
-    // Si es un usuario nuevo, verificar código de invitación
+    let inviteId: string | undefined;
+
     if (isNewUser) {
+      // Usuario nuevo - requerir código de invitación
       if (!inviteCode || inviteCode.trim() === '') {
-        // Hacer logout para no dejar el usuario autenticado sin código
         await signOut(auth);
         throw new Error('NEW_USER_NO_INVITE');
       }
-      await verifyAndUseInviteCode(inviteCode, email);
+      inviteId = await verifyAndUseInviteCode(inviteCode, email);
+    } else {
+      // Usuario existente - verificar si tiene invitación válida O es admin
+      const userData = userDoc.data();
+      const isAdmin = userData.role === 'admin';
+
+      // Si no es admin y no tiene inviteId, denegar acceso
+      if (!isAdmin && !userData.inviteId) {
+        await signOut(auth);
+        throw new Error('USER_NO_VALID_INVITE');
+      }
     }
 
     // Crear o actualizar perfil
-    await createUserProfile(result);
+    await createUserProfile(result, undefined, inviteId);
   };
 
   // Magic Link (Email Link)
