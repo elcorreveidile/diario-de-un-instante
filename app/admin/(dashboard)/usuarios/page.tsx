@@ -76,6 +76,43 @@ export default function UsuariosPage() {
     }
   };
 
+  const handleResendVerification = async (uid: string, email: string) => {
+    setActionLoading(uid);
+    setMessage('');
+
+    try {
+      const token = await user?.getIdToken();
+      if (!token) {
+        setMessage('Error: No hay token de autenticación');
+        setActionLoading(null);
+        return;
+      }
+
+      const response = await fetch('/api/admin/send-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ uid }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(`Email de verificación reenviado a ${email}`);
+      } else {
+        setMessage(data.error || 'Error al enviar email');
+      }
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error reenviando verificación:', error);
+      setMessage('Error al reenviar email de verificación');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   if (loading || loadingUsuarios) {
     return (
       <div className="text-center py-12">
@@ -173,11 +210,23 @@ export default function UsuariosPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {usuario.emailVerified ? (
-                      <span className="text-green-600">✓ Sí</span>
-                    ) : (
-                      <span className="text-red-600">✗ No</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {usuario.emailVerified ? (
+                        <span className="text-green-600">✓ Sí</span>
+                      ) : (
+                        <>
+                          <span className="text-red-600">✗ No</span>
+                          <button
+                            onClick={() => handleResendVerification(usuario.uid, usuario.email)}
+                            disabled={actionLoading === usuario.uid}
+                            className="text-xs text-violet-600 hover:text-violet-800 disabled:opacity-50 underline"
+                            title="Reenviar email de verificación"
+                          >
+                            Reenviar email
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {usuario.createdAt.toLocaleDateString('es-ES', {
