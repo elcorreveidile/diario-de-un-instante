@@ -548,6 +548,8 @@ export async function updateUsuarioRole(uid: string, role: 'admin' | 'user'): Pr
 
 // Eliminar un usuario (solo Firestore, no Firebase Auth)
 export async function deleteUsuario(uid: string): Promise<void> {
+  // Solo elimina de Firestore
+  // Para eliminar completamente, usa la API route que también elimina de Auth
   await deleteDoc(doc(db, 'users', uid));
 }
 

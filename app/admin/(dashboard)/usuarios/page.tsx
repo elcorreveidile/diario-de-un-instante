@@ -76,7 +76,7 @@ export default function UsuariosPage() {
   };
 
   const handleDelete = async (uid: string, email: string) => {
-    if (!confirm(`¿Estás seguro de eliminar al usuario ${email}?\n\n⚠️ NOTA: Esto solo elimina el perfil de Firestore. Para eliminar completamente la cuenta, también debes hacerlo desde Firebase Console > Authentication.`)) {
+    if (!confirm(`¿Estás seguro de eliminar completamente al usuario ${email}?\n\nEsta acción:\n✓ Eliminará la cuenta de Firebase Authentication\n✓ Eliminará el perfil de Firestore\n✓ Eliminará todos sus instantes\n\n⚠️ Esta acción NO se puede deshacer.`)) {
       return;
     }
 
@@ -84,10 +84,29 @@ export default function UsuariosPage() {
     setMessage('');
 
     try {
-      await deleteUsuario(uid);
-      setUsuarios(usuarios.filter(u => u.uid !== uid));
-      setMessage('Usuario eliminado correctamente');
-      setTimeout(() => setMessage(''), 3000);
+      const token = await user?.getIdToken();
+      if (!token) {
+        setMessage('Error: No hay token de autenticación');
+        setActionLoading(null);
+        return;
+      }
+
+      const response = await fetch(`/api/admin/users/${uid}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUsuarios(usuarios.filter(u => u.uid !== uid));
+        setMessage('✅ Usuario eliminado completamente (Auth + Firestore + instantes)');
+        setTimeout(() => setMessage(''), 5000);
+      } else {
+        setMessage(data.error || 'Error al eliminar usuario');
+      }
     } catch (error) {
       console.error('Error eliminando usuario:', error);
       setMessage('Error al eliminar usuario');
