@@ -16,13 +16,28 @@ export default function UsuariosPage() {
     setLoadingUsuarios(true);
     setMessage('');
     try {
-      const data = await getAllUsuarios();
-      console.log('Usuarios cargados:', data);
-      setUsuarios(data.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
+      const token = await user?.getIdToken();
+      if (!token) {
+        setMessage('Error: No hay token de autenticación');
+        setLoadingUsuarios(false);
+        return;
+      }
+
+      const response = await fetch('/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setUsuarios(result.users);
+      } else {
+        setMessage(result.error || 'Error al cargar usuarios');
+      }
     } catch (error: any) {
       console.error('Error cargando usuarios:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
       setMessage(`Error al cargar: ${error.message || 'Verifica la consola para más detalles'}`);
     } finally {
       setLoadingUsuarios(false);
