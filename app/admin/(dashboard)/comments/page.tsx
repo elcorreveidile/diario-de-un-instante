@@ -42,12 +42,15 @@ export default function AdminCommentsPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Error al cargar comentarios');
+        const data = await response.json();
+        throw new Error(data.error || 'Error al cargar comentarios');
       }
 
       const data = await response.json();
       setComments(data.comments || []);
+      setError(''); // Limpiar error si fue exitoso
     } catch (err) {
+      console.error('[Admin Comments] Error:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar comentarios');
     } finally {
       setLoading(false);
@@ -55,8 +58,11 @@ export default function AdminCommentsPage() {
   };
 
   useEffect(() => {
-    loadComments();
-  }, [user]);
+    // Solo cargar si tenemos usuario y es admin
+    if (user && isAdmin) {
+      loadComments();
+    }
+  }, [user, isAdmin]);
 
   const handleModerate = async (commentId: string, instanteId: string, action: 'approved' | 'rejected' | 'spam') => {
     setProcessing(commentId);
