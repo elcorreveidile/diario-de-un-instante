@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
-import { createComment, getInstanteById } from '@/lib/firestore';
+import { getInstanteById } from '@/lib/firestore';
 import type { CommentInput } from '@/lib/firestore';
 
 export const dynamic = 'force-dynamic';
@@ -53,16 +53,20 @@ export async function POST(request: NextRequest) {
     const userName = userData?.displayName || userData?.email?.split('@')[0] || 'Usuario';
     const userPhoto = userData?.photoURL;
 
-    const commentData: CommentInput = {
+    // Crear comentario usando adminDb (bypass reglas de seguridad)
+    const commentRef = await adminDb.collection('comments').add({
       instanteId,
       userId: decoded.uid,
       userName,
       userPhoto,
       content: content.trim(),
       parentId: parentId || null,
-    };
+      status: 'approved',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
-    const commentId = await createComment(commentData);
+    const commentId = commentRef.id;
 
     // Enviar notificación por email
     try {
