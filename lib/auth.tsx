@@ -216,6 +216,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isNewUser) {
       // Usuario nuevo - requerir código de invitación
       if (!inviteCode || inviteCode.trim() === '') {
+        // Usuario huérfano: existe en Firebase Auth pero no en Firestore
+        // Eliminarlo para que pueda registrarse correctamente
+        try {
+          await result.user.delete();
+        } catch (error) {
+          console.error('Error eliminando usuario huérfano:', error);
+        }
         await signOut(auth);
         throw new Error('NEW_USER_NO_INVITE');
       }
@@ -251,6 +258,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isNewUser) {
       // Usuario nuevo - requerir código de invitación
       if (!inviteCode || inviteCode.trim() === '') {
+        // Usuario huérfano: existe en Firebase Auth pero no en Firestore
+        // Eliminarlo para que pueda registrarse correctamente
+        try {
+          await result.user.delete();
+        } catch (error) {
+          console.error('Error eliminando usuario huérfano:', error);
+        }
         await signOut(auth);
         throw new Error('NEW_USER_NO_INVITE');
       }
