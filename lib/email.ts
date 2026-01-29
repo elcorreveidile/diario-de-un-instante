@@ -13,6 +13,7 @@ function getResend() {
     resendInstance = new Resend(process.env.RESEND_API_KEY);
   }
   return resendInstance;
+}
 
 export async function sendConfirmationEmail(
   email: string,
