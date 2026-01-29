@@ -21,7 +21,7 @@ async function verifyAdmin(request: NextRequest): Promise<string | null> {
     }
 
     const userData = userDoc.data();
-    if (userData.role !== 'admin') {
+    if (!userData || userData.role !== 'admin') {
       return null;
     }
 
