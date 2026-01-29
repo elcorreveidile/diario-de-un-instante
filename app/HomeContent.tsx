@@ -6,8 +6,10 @@ import { getGlobalAreasConUltimoInstante, getGlobalEstadisticas, AreaConUltimoIn
 import AreaCard from '@/components/AreaCard';
 import Stats from '@/components/Stats';
 import { createInvitationRequest } from '@/lib/invites';
+import { useAuth } from '@/lib/auth';
 
 export default function HomeContent() {
+  const { user } = useAuth();
   const [areas, setAreas] = useState<AreaConUltimoInstante[]>([]);
   const [stats, setStats] = useState({
     totalInstantes: 0,
@@ -147,7 +149,7 @@ export default function HomeContent() {
             Panel de admin
           </Link>
 
-          {!showInviteForm ? (
+          {!showInviteForm && !user ? (
             <button
               onClick={() => setShowInviteForm(true)}
               className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-lg transition-colors text-sm font-medium"
@@ -264,7 +266,7 @@ export default function HomeContent() {
         )}
 
         {/* Texto de invitación cuando no se muestra el formulario */}
-        {!showInviteForm && (
+        {!showInviteForm && !user && (
           <div className="max-w-3xl mx-auto mt-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
               ¿Quieres tu propio Diario de un Instante?
@@ -300,10 +302,11 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className="mb-12">
-        <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl border border-violet-200 dark:border-violet-800 p-8 sm:p-10">
-          <div className="text-center max-w-2xl mx-auto">
+      {/* Newsletter - Solo mostrar si no hay usuario logueado */}
+      {!user && (
+        <section className="mb-12">
+          <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl border border-violet-200 dark:border-violet-800 p-8 sm:p-10">
+            <div className="text-center max-w-2xl mx-auto">
             {!showNewsletterForm ? (
               <>
                 <div className="text-4xl mb-4">📧</div>
@@ -396,6 +399,7 @@ export default function HomeContent() {
           </div>
         </div>
       </section>
+      )}
     </div>
   );
 }
