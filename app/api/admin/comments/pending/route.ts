@@ -31,22 +31,20 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const instanteId = searchParams.get('instanteId');
 
-    let q: any;
-
+    // Obtener comentarios SIN orderBy para evitar necesidad de índice compuesto
+    let snapshot;
     if (instanteId) {
-      q = adminDb
+      snapshot = await adminDb
         .collection('comments')
         .where('instanteId', '==', instanteId)
         .where('status', '==', 'pending')
-        .orderBy('createdAt', 'desc');
+        .get();
     } else {
-      q = adminDb
+      snapshot = await adminDb
         .collection('comments')
         .where('status', '==', 'pending')
-        .orderBy('createdAt', 'desc');
+        .get();
     }
-
-    const snapshot = await q.get();
 
     const comments = snapshot.docs.map((doc: any) => {
       const data = doc.data();
@@ -56,6 +54,13 @@ export async function GET(request: NextRequest) {
         createdAt: data.createdAt?.toDate?.() || data.createdAt,
         updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
       };
+    });
+
+    // Ordenar manualmente por createdAt descendente
+    comments.sort((a: any, b: any) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime; // Descendente
     });
 
     return NextResponse.json({

@@ -829,13 +829,13 @@ export async function getCommentsByInstante(instanteId: string): Promise<Comment
   const q = query(
     collection(db, COMMENTS_COLLECTION),
     where('instanteId', '==', instanteId),
-    where('status', '==', 'approved'),
-    orderBy('createdAt', 'desc')
+    where('status', '==', 'approved')
+    // Sin orderBy para evitar necesidad de índice compuesto
   );
 
   const snapshot = await getDocs(q);
 
-  return snapshot.docs
+  const comments = snapshot.docs
     .map(doc => {
       const data = doc.data();
       return {
@@ -848,6 +848,15 @@ export async function getCommentsByInstante(instanteId: string): Promise<Comment
       };
     })
     .filter((comment: any) => !comment.deletedAt) as Comment[];
+
+  // Ordenar manualmente por createdAt descendente
+  comments.sort((a: any, b: any) => {
+    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return bTime - aTime;
+  });
+
+  return comments;
 }
 
 // Construir árbol de comentarios con respuestas anidadas
