@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.0] - 2026-01-29
+## [0.7.0] - 2026-01-29 ✅ RELEASED
+
+### Status
+**✅ COMPLETED** - All planned features implemented and deployed to production.
+
+### Summary
+Major content update with 12 life areas, advanced tagging system, image uploads, and area guide templates. Enhanced security for OAuth and password reset flows.
 
 ### Added 🎉
 - **12ª área: Comunidad y Contribución** 🤝
@@ -147,6 +153,25 @@ None
 ### Migration Notes 📝
 - Existing users need to configure their username via `/admin/configuracion-blog` to activate their blog
 - Old instantes without `privado` field now default to public (consistent with intended behavior)
+
+---
+
+## [0.8.0] - Upcoming 🚧
+
+### Planned Features 📋
+- **Programación de publicaciones**
+  - Vercel Cron Jobs para publicaciones automáticas
+  - Selector de fecha/hora en formulario de creación
+  - Estado `programado` adicional a `borrador` | `publicado`
+  - Email de notificación cuando se publique un instante programado
+  - Vista de "Programados" en panel de admin
+
+### Technical Implementation 🛠️
+- Campo `scheduledAt` en documentos de instantes
+- API route `/api/cron/publish-scheduled` para Vercel Cron
+- Query para filtrar instantes con `scheduledAt <= now` y `estado: 'programado'`
+- Actualización masiva de estado a `publicado`
+- Sistema de notificaciones por email
 
 ---
 
