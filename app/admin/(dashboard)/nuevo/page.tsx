@@ -27,6 +27,17 @@ export default function NuevoInstantePage() {
   const [estado, setEstado] = useState<'borrador' | 'publicado'>('borrador');
   const [privado, setPrivado] = useState(false);
 
+  // Función para usar una pregunta guía como base
+  const usePrompt = (pregunta: string) => {
+    setTitulo(pregunta);
+    setContent(`## ${pregunta}\n\n`);
+  };
+
+  // Obtener el área seleccionada con sus preguntas guía
+  const getAreaInfo = (areaId: AreaId) => {
+    return AREAS.find(a => a.id === areaId);
+  };
+
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError('');
@@ -157,6 +168,40 @@ export default function NuevoInstantePage() {
             ))}
           </select>
         </div>
+
+        {/* Preguntas guía - aparece después de seleccionar área */}
+        {area && getAreaInfo(area)?.preguntasGuia && (
+          <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-lg p-5 border border-violet-200 dark:border-violet-800">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">{getAreaInfo(area)?.emoji}</span>
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                Preguntas para inspirarte
+              </h4>
+            </div>
+
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
+              Si no sabes por dónde empezar, usa estas preguntas como guía:
+            </p>
+
+            <ul className="space-y-2">
+              {getAreaInfo(area)?.preguntasGuia?.map((pregunta, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <button
+                    type="button"
+                    onClick={() => usePrompt(pregunta)}
+                    className="flex-shrink-0 w-6 h-6 rounded-full bg-white dark:bg-gray-800 border border-violet-300 dark:border-violet-700 text-violet-600 dark:text-violet-400 text-xs flex items-center justify-center hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors font-medium"
+                    title="Usar esta pregunta como base"
+                  >
+                    {idx + 1}
+                  </button>
+                  <span className="text-sm text-gray-700 dark:text-gray-300 leading-snug">
+                    {pregunta}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Contenido */}
         <div data-color-mode="auto">

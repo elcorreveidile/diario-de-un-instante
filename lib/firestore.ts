@@ -20,67 +20,144 @@ export const AREAS = [
     id: 'trabajo',
     nombre: 'Trabajo',
     emoji: '💼',
-    definicion: 'Mi oficio, el servicio que ofrezco y el valor que genero en el mundo.'
+    definicion: 'Mi oficio, el servicio que ofrezco y el valor que genero en el mundo.',
+    preguntasGuia: [
+      '¿Qué logro profesional celebro hoy?',
+      '¿Qué habilidad fortalecí en mi trabajo?',
+      '¿Cómo mi trabajo aportó valor a otros?',
+      '¿Qué desafío superé y qué aprendí?',
+      '¿Qué relación construí o fortalecí profesionalmente?'
+    ]
   },
   {
     id: 'aprendizaje',
     nombre: 'Aprendizaje',
     emoji: '📚',
-    definicion: 'El ejercicio de expandir mi mundo interior y mis capacidades.'
+    definicion: 'El ejercicio de expandir mi mundo interior y mis capacidades.',
+    preguntasGuia: [
+      '¿Qué nuevo conocimiento adquirí hoy?',
+      '¿Qué habilidad practiqué o mejoré?',
+      '¿Qué descubrimiento hice sobre mí mismo?',
+      '¿Qué libro, curso o recurso me inspiró?',
+      '¿Qué error se convirtió en aprendizaje?'
+    ]
   },
   {
     id: 'salud',
     nombre: 'Salud',
     emoji: '🏃',
-    definicion: 'El pilar que sostiene toda mi energía, claridad y bienestar.'
+    definicion: 'El pilar que sostiene toda mi energía, claridad y bienestar.',
+    preguntasGuia: [
+      '¿Cómo cuidé mi cuerpo hoy?',
+      '¿Qué elección saludable hice?',
+      '¿Cómo me sentí física y mentalmente?',
+      '¿Qué hábito wellness fortalecí?',
+      '¿Cómo descansé y recargué energías?'
+    ]
   },
   {
     id: 'gestion-cultural',
     nombre: 'Gestión Cultural',
     emoji: '🎭',
-    definicion: 'Construir puentes y ser un agente activo en el mundo de las ideas y el arte.'
+    definicion: 'Construir puentes y ser un agente activo en el mundo de las ideas y el arte.',
+    preguntasGuia: [
+      '¿Qué experiencia cultural me impactó?',
+      '¿Qué idea o proyecto artístico exploré?',
+      '¿Cómo conecté con otras personas a través del arte o la cultura?',
+      '¿Qué obra (libro, película, música) me inspiró?',
+      '¿Qué iniciativa cultural impulsé o apoyé?'
+    ]
   },
   {
     id: 'ocio',
     nombre: 'Ocio',
     emoji: '🎮',
-    definicion: 'El espacio para la alegría pura, el juego y la recreación sin culpa.'
+    definicion: 'El espacio para la alegría pura, el juego y la recreación sin culpa.',
+    preguntasGuia: [
+      '¿Qué actividad me hizo sonreír hoy?',
+      '¿Cómo me permití descansar sin culpas?',
+      '¿Qué hobby o pasatiempo disfruté plenamente?',
+      '¿Qué momento de alegría pura viví?',
+      '¿Cómo desconecté de mis obligaciones y disfruté el presente?'
+    ]
   },
   {
     id: 'creacion',
     nombre: 'Creación',
     emoji: '✨',
-    definicion: 'El taller de mi alma, donde mi voz literaria encuentra forma y se expresa.'
+    definicion: 'El taller de mi alma, donde mi voz literaria encuentra forma y se expresa.',
+    preguntasGuia: [
+      '¿Qué creé hoy con mis manos o mi mente?',
+      '¿Qué idea puse en papel o comenzó a tomar forma?',
+      '¿Cómo expresé mi voz única?',
+      '¿Qué bloqueo creativo superé?',
+      '¿Qué proyecto o obra me apasiona hoy?'
+    ]
   },
   {
     id: 'amistades',
     nombre: 'Amistades',
     emoji: '👥',
-    definicion: 'Los lazos que elijo y que nutren, desafían y celebran mi camino.'
+    definicion: 'Los lazos que elijo y que nutren, desafían y celebran mi camino.',
+    preguntasGuia: [
+      '¿Qué amigo connecté o reconecté hoy?',
+      '¿Cómo fui un buen amigo para alguien?',
+      '¿Qué conversación significativa tuve?',
+      '¿Qué momento compartido valoro especialmente?',
+      '¿Cómo nutrí mis relaciones de amistad?'
+    ]
   },
   {
     id: 'familia',
     nombre: 'Familia',
     emoji: '🏠',
-    definicion: 'Mi raíz, mi origen y el núcleo incondicional de mi historia.'
+    definicion: 'Mi raíz, mi origen y el núcleo incondicional de mi historia.',
+    preguntasGuia: [
+      '¿Qué momento familiar disfruté hoy?',
+      '¿Cómo demostré amor a mis seres queridos?',
+      '¿Qué tradición o recuerdo familiar valoré?',
+      '¿Qué conversación importante tuve con mi familia?',
+      '¿Cómo honré mis raíces y mi historia?'
+    ]
   },
   {
     id: 'entorno',
     nombre: 'Entorno',
     emoji: '🌱',
-    definicion: 'Diseñar el espacio físico y los sistemas que me rodean para potenciar mi vida.'
+    definicion: 'Diseñar el espacio físico y los sistemas que me rodean para potenciar mi vida.',
+    preguntasGuia: [
+      '¿Cómo mejoré mi espacio físico hoy?',
+      '¿Qué organización o sistema optimicé?',
+      '¿Qué cambio en mi entorno me hizo sentir mejor?',
+      '¿Cómo cuidé el espacio donde vivo o trabajo?',
+      '¿Qué ajuste a mis rutinas o sistemas funcionó bien?'
+    ]
   },
   {
     id: 'finanzas',
     nombre: 'Finanzas',
     emoji: '💰',
-    definicion: 'La herramienta que me da libertad, seguridad y la capacidad de construir mis sueños.'
+    definicion: 'La herramienta que me da libertad, seguridad y la capacidad de construir mis sueños.',
+    preguntasGuia: [
+      '¿Qué decisión financiera inteligente hice hoy?',
+      '¿Cómo avancé hacia mis metas financieras?',
+      '¿Qué gasto evité o qué dinero ahorré?',
+      '¿Qué inversión (en dinero o en mí mismo) hice?',
+      '¿Cómo practicé gratitud por lo que tengo?'
+    ]
   },
   {
     id: 'tecnologia',
     nombre: 'Tecnología',
     emoji: '💻',
-    definicion: 'El taller donde mis ideas digitales toman forma y se hacen realidad.'
+    definicion: 'El taller donde mis ideas digitales toman forma y se hacen realidad.',
+    preguntasGuia: [
+      '¿Qué herramienta o tecnología aprendí a usar mejor?',
+      '¿Qué proyecto digital avancé hoy?',
+      '¿Cómo usé la tecnología para mejorar mi vida?',
+      '¿Qué problema técnico resolví?',
+      '¿Qué idea o prototipo comencé a desarrollar?'
+    ]
   },
 ] as const;
 
