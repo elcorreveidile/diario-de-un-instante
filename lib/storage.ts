@@ -106,7 +106,13 @@ export async function uploadInstanteImages(
     const path = `instantes/${userId}/${filename}`;
 
     try {
-      const url = await uploadImage(file, path);
+      // Subir archivo
+      await uploadBytes(ref(storage, path), file);
+
+      // Construir URL permanente sin token (usando alt=media)
+      // Formato: https://firebasestorage.googleapis.com/v0/b/bucket/o/path?alt=media
+      const encodedPath = path.split('/').map(encodeURIComponent).join('/');
+      const url = `https://firebasestorage.googleapis.com/v0/b/diariodeuninstante.appspot.com/o/${encodedPath}?alt=media`;
 
       results.push({
         url,
