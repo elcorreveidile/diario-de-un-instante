@@ -365,3 +365,46 @@ function formatMes(año: number, mes: number): string {
 
   return `${nombres[mes]} ${año}`;
 }
+
+// ============================================================================
+// COMPARATIVA DE ÚLTIMOS 6 MESES (v0.8)
+// ============================================================================
+
+export interface DatosComparativaMes {
+  mes: string; // "Enero 2026"
+  year: number;
+  month: number;
+  total: number;
+  areas: Record<string, number>;
+}
+
+export function calcularComparativaUltimos6Meses(instantes: Instante[]): DatosComparativaMes[] {
+  const meses: DatosComparativaMes[] = [];
+  const hoy = new Date();
+
+  for (let i = 5; i >= 0; i--) {
+    const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+    const year = fecha.getFullYear();
+    const month = fecha.getMonth();
+
+    const instantesDelMes = instantes.filter(i => {
+      const fechaInstante = new Date(i.fecha);
+      return fechaInstante.getFullYear() === year && fechaInstante.getMonth() === month;
+    });
+
+    const areas: Record<string, number> = {};
+    instantesDelMes.forEach(i => {
+      areas[i.area] = (areas[i.area] || 0) + 1;
+    });
+
+    meses.push({
+      mes: fecha.toLocaleDateString('es-ES', { year: 'numeric', month: 'long' }),
+      year,
+      month,
+      total: instantesDelMes.length,
+      areas,
+    });
+  }
+
+  return meses;
+}

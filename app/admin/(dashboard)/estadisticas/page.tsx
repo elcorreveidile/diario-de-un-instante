@@ -6,6 +6,8 @@ import { useAuth } from '@/lib/auth';
 import {
   calcularEstadisticasCompletas,
   EstadisticasCompletas,
+  calcularComparativaUltimos6Meses,
+  DatosComparativaMes,
 } from '@/lib/estadisticas';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -22,13 +24,15 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  Line,
+  LineChart,
+  CartesianGrid,
 } from 'recharts';
 
 export default function EstadisticasPage() {
   const { user } = useAuth();
-  const [estadisticas, setEstadisticas] = useState<EstadisticasCompletas | null>(
-    null
-  );
+  const [estadisticas, setEstadisticas] = useState<EstadisticasCompletas | null>(null);
+  const [comparativa6Meses, setComparativa6Meses] = useState<DatosComparativaMes[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,6 +43,10 @@ export default function EstadisticasPage() {
         const instantes = await getInstantesByUser(user.uid);
         const stats = await calcularEstadisticasCompletas(instantes, true); // true = incluir privados
         setEstadisticas(stats);
+
+        // Calcular comparativa de 6 meses
+        const comp6Meses = calcularComparativaUltimos6Meses(instantes);
+        setComparativa6Meses(comp6Meses);
       } catch (error) {
         console.error('Error cargando estadísticas:', error);
       } finally {
@@ -97,10 +105,36 @@ export default function EstadisticasPage() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Estadísticas</h1>
-        <p className="text-gray-500 mt-1">
-          Análisis de tus patrones de escritura
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Estadísticas</h1>
+            <p className="text-gray-500 mt-1">
+              Análisis de tus patrones de escritura
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={async () => {
+                if (!user) return;
+                const token = await user.getIdToken();
+                window.open(`/api/analytics?format=json&token=${token}`, '_blank');
+              }}
+              className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 text-sm font-medium transition-colors"
+            >
+              📥 Exportar JSON
+            </button>
+            <button
+              onClick={async () => {
+                if (!user) return;
+                const token = await user.getIdToken();
+                window.open(`/api/analytics?format=markdown&token=${token}`, '_blank');
+              }}
+              className="px-4 py-2 border border-violet-600 text-violet-600 rounded-lg hover:bg-violet-50 text-sm font-medium transition-colors"
+            >
+              📄 Exportar Markdown
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Racha Actual */}
@@ -233,6 +267,44 @@ export default function EstadisticasPage() {
               {estadisticas.comparativaMeses.mesActual.periodo}
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Evolución últimos 6 meses */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          📈 Evolución últimos 6 meses
+        </h2>
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={comparativa6Meses}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis
+                dataKey="mes"
+                tick={{ fill: '#6b7280', fontSize: 11 }}
+                stroke="#e5e7eb"
+              />
+              <YAxis
+                tick={{ fill: '#9ca3af', fontSize: 12 }}
+                stroke="#e5e7eb"
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '0.5rem',
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="total"
+                stroke="#8b5cf6"
+                strokeWidth={3}
+                dot={{ fill: '#8b5cf6', r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
