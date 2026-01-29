@@ -180,6 +180,8 @@ export interface Instante {
   // v0.6 - Reacciones
   likes?: string[]; // Array de UIDs de usuarios que dieron like
   likeCount?: number; // Contador de likes (para ordenamiento)
+  // v0.7 - Tags
+  tags?: string[]; // Array de tags personalizados (ej: ['productividad', 'reflexión'])
 }
 
 // Interfaz para crear/actualizar
@@ -193,6 +195,7 @@ export interface InstanteInput {
   content: string;
   estado: 'borrador' | 'publicado';
   privado: boolean;
+  tags?: string[]; // v0.7 - Tags personalizados
 }
 
 // Interfaz para el área con su último instante
@@ -1062,6 +1065,66 @@ export async function getPendingComments(instanteId?: string): Promise<Comment[]
 export async function getCommentCount(instanteId: string): Promise<number> {
   const comments = await getCommentsByInstante(instanteId);
   return comments.length;
+}
+
+// ==================== v0.7 - TAGS ====================
+
+/**
+ * Obtener todos los tags usados en instantes públicos
+ * @returns Array de tags únicos ordenados alfabéticamente
+ */
+export async function getAllTags(): Promise<string[]> {
+  const allInstantes = await getPublicInstantes();
+
+  // Recopilar todos los tags únicos
+  const tagsSet = new Set<string>();
+  allInstantes.forEach(instante => {
+    if (instante.tags) {
+      instante.tags.forEach(tag => tagsSet.add(tag));
+    }
+  });
+
+  // Ordenar alfabéticamente
+  return Array.from(tagsSet).sort((a, b) => a.localeCompare(b, 'es'));
+}
+
+/**
+ * Obtener instantes por tag
+ * @param tag Tag a buscar
+ * @returns Array de instantes con ese tag
+ */
+export async function getInstantesByTag(tag: string): Promise<Instante[]> {
+  const allInstantes = await getPublicInstantes();
+
+  return allInstantes.filter(instante =>
+    instante.tags?.includes(tag)
+  );
+}
+
+/**
+ * Obtener tags más populares con conteo
+ * @param limit Número máximo de tags a devolver
+ * @returns Array de tags con su conteo de uso
+ */
+export async function getPopularTags(limit: number = 20): Promise<Array<{ tag: string; count: number }>> {
+  const allInstantes = await getPublicInstantes();
+
+  const tagCounts = new Map<string, number>();
+
+  allInstantes.forEach(instante => {
+    if (instante.tags) {
+      instante.tags.forEach(tag => {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+      });
+    }
+  });
+
+  // Convertir a array y ordenar por popularidad
+  const sorted = Array.from(tagCounts.entries())
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count);
+
+  return sorted.slice(0, limit);
 }
 
 // ==================== FIN COMENTARIOS v0.6 ====================

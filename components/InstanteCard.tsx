@@ -90,6 +90,26 @@ export default function InstanteCard({
           {instante.content.replace(/[#*`\[\]]/g, '').substring(0, 150)}...
         </p>
 
+        {/* Tags */}
+        {instante.tags && instante.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {instante.tags.map((tag) => (
+              <Link
+                key={tag}
+                href={`/tag/${encodeURIComponent(tag)}`}
+                className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.location.href = `/tag/${encodeURIComponent(tag)}`;
+                }}
+              >
+                #{tag}
+              </Link>
+            ))}
+          </div>
+        )}
+
         {/* Footer con área y likes */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-300 dark:border-gray-700">
           {showArea && areaInfo && (

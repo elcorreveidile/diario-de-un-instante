@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { createInstante, generateSlug, AREAS, AreaId } from '@/lib/firestore';
+import { createInstante, generateSlug, AREAS, AreaId, getAllTags } from '@/lib/firestore';
 import { useAuth } from '@/lib/auth';
 import { useHotkeys } from 'react-hotkeys-hook';
 
@@ -26,6 +26,38 @@ export default function NuevoInstantePage() {
   const [content, setContent] = useState('');
   const [estado, setEstado] = useState<'borrador' | 'publicado'>('borrador');
   const [privado, setPrivado] = useState(false);
+
+  // v0.7 - Tags
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+  const [existingTags, setExistingTags] = useState<string[]>([]);
+
+  // Cargar tags existentes al montar
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const existing = await getAllTags();
+        setExistingTags(existing);
+      } catch (error) {
+        console.error('Error cargando tags:', error);
+      }
+    };
+    loadTags();
+  }, []);
+
+  // Función para añadir tag
+  const addTag = (tag: string) => {
+    const normalized = tag.toLowerCase().trim();
+    if (normalized && !tags.includes(normalized) && tags.length < 10) {
+      setTags([...tags, normalized]);
+    }
+  };
+
+  // Función para eliminar tag
+  const removeTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag));
+  };
 
   // Función para usar una pregunta guía como base
   const usePrompt = (pregunta: string) => {
@@ -62,6 +94,7 @@ export default function NuevoInstantePage() {
         content,
         estado,
         privado,
+        tags, // v0.7 - Tags
       });
 
       router.push('/admin');
@@ -202,6 +235,90 @@ export default function NuevoInstantePage() {
             </ul>
           </div>
         )}
+
+        {/* Tags/etiquetas */}
+        <div>
+          <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            🏷️ Etiquetas (opcional)
+          </label>
+
+          <div className="relative">
+            <input
+              id="tags"
+              type="text"
+              value={tagInput}
+              onChange={(e) => {
+                setTagInput(e.target.value);
+                // Buscar tags existentes que coincidan
+                if (e.target.value.length > 0) {
+                  const matching = existingTags.filter(tag =>
+                    tag.toLowerCase().includes(e.target.value.toLowerCase())
+                  );
+                  setTagSuggestions(matching.slice(0, 5));
+                } else {
+                  setTagSuggestions([]);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && tagInput.trim()) {
+                  e.preventDefault();
+                  addTag(tagInput.trim());
+                  setTagInput('');
+                  setTagSuggestions([]);
+                }
+              }}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              placeholder="Escribe y presiona Enter para añadir"
+            />
+
+            {/* Dropdown de sugerencias */}
+            {tagSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-40 overflow-auto">
+                {tagSuggestions.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => {
+                      addTag(tag);
+                      setTagInput('');
+                      setTagSuggestions([]);
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Tags seleccionados */}
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 rounded-full text-sm"
+                >
+                  #{tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="hover:text-violet-900 dark:hover:text-violet-300 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {tags.length >= 10 ? 'Máximo 10 etiquetas' : `Ejemplos: productividad, reflexión, hábito, mindfulness`}
+          </p>
+        </div>
 
         {/* Contenido */}
         <div data-color-mode="auto">
