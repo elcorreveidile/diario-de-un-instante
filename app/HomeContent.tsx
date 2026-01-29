@@ -16,7 +16,7 @@ export default function HomeContent() {
     pensamientos: 0,
     acciones: 0,
     areasActivas: 0,
-    totalAreas: 11,
+    totalAreas: 12,
   });
   const [loading, setLoading] = useState(true);
 
@@ -293,7 +293,7 @@ export default function HomeContent() {
       {/* Grid de Áreas */}
       <section>
         <h2 className="section-title">
-          Las 11 áreas de mi vida
+          Las 12 áreas de mi vida
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {areas.map((area) => (

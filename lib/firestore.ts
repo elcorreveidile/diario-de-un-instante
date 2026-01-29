@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 
-// Definición de las 11 áreas de vida
+// Definición de las 12 áreas de vida
 export const AREAS = [
   {
     id: 'trabajo',
@@ -157,6 +157,19 @@ export const AREAS = [
       '¿Cómo usé la tecnología para mejorar mi vida?',
       '¿Qué problema técnico resolví?',
       '¿Qué idea o prototipo comencé a desarrollar?'
+    ]
+  },
+  {
+    id: 'comunidad',
+    nombre: 'Comunidad y Contribución',
+    emoji: '🤝',
+    definicion: 'Cómo contribuyo al mundo más allá de mí mismo y dejo un legado positivo.',
+    preguntasGuia: [
+      '¿Cómo ayudé a alguien o contribuí a mi comunidad hoy?',
+      '¿Qué acto de servicio o generosidad ofrecí?',
+      '¿Qué causa o proyecto comunitario me apasiona?',
+      '¿Qué estoy haciendo para dejar el mundo un poco mejor?',
+      '¿Cómo usé mis habilidades para servir a otros?'
     ]
   },
 ] as const;

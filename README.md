@@ -18,7 +18,7 @@ La idea es simple pero poderosa: transformar la planificación abstracta en una 
 - **Alojamiento**: Vercel
 - **Admin SDK**: Firebase Admin (server-side operations)
 
-## 📂 Las 11 Áreas
+## 📂 Las 12 Áreas
 
 El sistema se estructura en torno a estas áreas fundamentales:
 
@@ -32,7 +32,8 @@ El sistema se estructura en torno a estas áreas fundamentales:
 8. 👨‍👩‍👧‍👦 **Familia** - Tiempo en familia y eventos
 9. 🌍 **Entorno** - Hogar, espacios y entorno físico
 10. 💰 **Finanzas** - Ahorros, inversiones y finanzas personales
-11. 🧠 **Espíritu** - Meditación, mindfulness y crecimiento interior
+11. 💻 **Tecnología** - Proyectos digitales y herramientas tecnológicas
+12. 🤝 **Comunidad y Contribución** - Voluntariado, servicio y legado
 
 ## 🎯 Características por Versión
 

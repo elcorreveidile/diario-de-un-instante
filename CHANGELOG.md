@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.0] - 2026-01-29
 
 ### Added 🎉
-- **Plantillas por área**: 55 preguntas guía (5 por cada una de las 11 áreas)
+- **12ª área: Comunidad y Contribución** 🤝
+  - Cubre cómo contribuyes al mundo más allá de tu círculo inmediato
+  - Preguntas guía sobre voluntariado, servicio, y legado
+  - Complementa las 11 áreas existentes con la dimensión de dar a otros
+- **Plantillas por área**: 60 preguntas guía (5 por cada una de las 12 áreas)
   - Combat el "síndrome de la página en blanco"
   - Preguntas contextuales que aparecen al seleccionar un área
   - Botones clickeables para usar pregunta como base del instante
