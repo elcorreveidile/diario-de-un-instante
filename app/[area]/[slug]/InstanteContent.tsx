@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getAllInstantes, getInstantesByUser, Instante, toggleLike } from '@/lib/firestore';
+import { getAllInstantes, getInstantesByUser, Instante, toggleLike, ImageMetadata } from '@/lib/firestore';
 import { useAuth } from '@/lib/auth';
 import { remark } from 'remark';
 import html from 'remark-html';
@@ -349,6 +350,29 @@ export default function InstanteContent({ areaId, slug }: InstanteContentProps) 
             className={`prose-instante ${zenMode ? 'zen-content' : ''}`}
             dangerouslySetInnerHTML={{ __html: contentHtml }}
           />
+
+          {/* Galería de imágenes */}
+          {instante.images && instante.images.length > 0 && (
+            <div className="my-8">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                📷 Galería
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {instante.images.map((img, idx) => (
+                  <div key={idx} className="relative group">
+                    <Image
+                      src={img.url}
+                      alt={img.name}
+                      width={800}
+                      height={600}
+                      className="rounded-lg border border-gray-200 dark:border-gray-700"
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </article>
 
         {/* Sección de comentarios */}

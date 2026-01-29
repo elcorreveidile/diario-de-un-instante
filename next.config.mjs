@@ -4,6 +4,17 @@ import withPWA from '@ducanh2912/next-pwa';
 const nextConfig = {
   // Configuración para leer archivos markdown en producción
   output: 'standalone',
+  // v0.7 - Configuración para imágenes remotas de Firebase Storage
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        port: '',
+        pathname: '/v0/b/diariodeuninstante.appspot.com/o/**',
+      },
+    ],
+  },
 };
 
 export default withPWA({

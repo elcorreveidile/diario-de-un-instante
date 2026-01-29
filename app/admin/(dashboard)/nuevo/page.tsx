@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { createInstante, generateSlug, AREAS, AreaId, getAllTags } from '@/lib/firestore';
+import { createInstante, generateSlug, AREAS, AreaId, getAllTags, ImageMetadata } from '@/lib/firestore';
+import { uploadInstanteImages } from '@/lib/storage';
 import { useAuth } from '@/lib/auth';
 import { useHotkeys } from 'react-hotkeys-hook';
 
@@ -33,6 +34,10 @@ export default function NuevoInstantePage() {
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
   const [existingTags, setExistingTags] = useState<string[]>([]);
 
+  // v0.7 - Imágenes
+  const [images, setImages] = useState<ImageMetadata[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+
   // Cargar tags existentes al montar
   useEffect(() => {
     const loadTags = async () => {
@@ -57,6 +62,36 @@ export default function NuevoInstantePage() {
   // Función para eliminar tag
   const removeTag = (tag: string) => {
     setTags(tags.filter(t => t !== tag));
+  };
+
+  // Función para subir imágenes
+  const handleImageUpload = async (files: FileList | null) => {
+    if (!files || !user?.uid) return;
+
+    const fileArray = Array.from(files);
+
+    if (images.length + fileArray.length > 5) {
+      alert('Máximo 5 imágenes por instante');
+      return;
+    }
+
+    setUploadingImages(true);
+
+    try {
+      // Subir a Firebase Storage
+      const uploaded = await uploadInstanteImages(user.uid, 'temp', fileArray);
+      setImages([...images, ...uploaded]);
+    } catch (error: any) {
+      alert('Error al subir imágenes: ' + error.message);
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  // Función para eliminar imagen
+  const removeImage = async (index: number) => {
+    const newImages = images.filter((_, i) => i !== index);
+    setImages(newImages);
   };
 
   // Función para usar una pregunta guía como base
@@ -95,6 +130,7 @@ export default function NuevoInstantePage() {
         estado,
         privado,
         tags, // v0.7 - Tags
+        images, // v0.7 - Imágenes
       });
 
       router.push('/admin');
@@ -318,6 +354,97 @@ export default function NuevoInstantePage() {
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             {tags.length >= 10 ? 'Máximo 10 etiquetas' : `Ejemplos: productividad, reflexión, hábito, mindfulness`}
           </p>
+        </div>
+
+        {/* Galería de imágenes */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            📷 Imágenes (opcional, máximo 5)
+          </label>
+
+          <div className="space-y-3">
+            {/* Drop zone o botón de selección */}
+            {images.length === 0 && (
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                <svg className="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  Arrastra imágenes aquí o haz clic para seleccionar
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-500 mb-4">
+                  JPG, PNG, GIF hasta 5MB cada una
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => handleImageUpload(e.target.files)}
+                  disabled={uploadingImages}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label
+                  htmlFor="image-upload"
+                  className={`inline-block px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 cursor-pointer transition-colors ${
+                    uploadingImages ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {uploadingImages ? 'Subiendo...' : 'Seleccionar imágenes'}
+                </label>
+              </div>
+            )}
+
+            {/* Preview de imágenes */}
+            {images.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {images.map((img, idx) => (
+                  <div key={idx} className="relative group">
+                    <img
+                      src={img.url}
+                      alt={`Vista previa ${idx + 1}`}
+                      className="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      title="Eliminar imagen"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                      {img.name}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Botón añadir más si < 5 */}
+                {images.length < 5 && (
+                  <label className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center h-32 cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => handleImageUpload(e.target.files)}
+                      disabled={uploadingImages}
+                      className="hidden"
+                    />
+                    <svg className="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Añadir más</span>
+                  </label>
+                )}
+              </div>
+            )}
+
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {images.length}/5 imágenes {images.length >= 5 && '(máximo alcanzado)'}
+            </p>
+          </div>
         </div>
 
         {/* Contenido */}
