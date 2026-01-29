@@ -12,7 +12,7 @@ export default function Footer() {
 
           {/* Versión, créditos y RSS */}
           <div className="flex flex-col sm:flex-row items-center gap-2 text-xs text-gray-300 dark:text-gray-600 text-center sm:text-right">
-            <span>v0.6 - Social y Compartir</span>
+            <span>v0.7 - Contenido Avanzado</span>
             <span>·</span>
             <span>Desarrollado por <a href="https://twitter.com/jabelainez" target="_blank" rel="noopener noreferrer" className="hover:text-gray-500 dark:hover:text-gray-400 transition-colors">@jabelainez</a></span>
             <span>·</span>

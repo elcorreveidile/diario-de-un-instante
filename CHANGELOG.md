@@ -5,6 +5,83 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-01-29
+
+### Added 🎉
+- **Plantillas por área**: 55 preguntas guía (5 por cada una de las 11 áreas)
+  - Combat el "síndrome de la página en blanco"
+  - Preguntas contextuales que aparecen al seleccionar un área
+  - Botones clickeables para usar pregunta como base del instante
+- **Sistema de tags/etiquetas transversales**:
+  - Campo `tags` en instantes (array de strings)
+  - Input con autocompletado usando tags existentes
+  - Máximo 10 tags por instante
+  - Página `/tag/[tag]` para ver todos los instantes con un tag específico
+  - Tags mostrados como chips en InstanteCard con enlaces
+  - API `/api/tags` para obtener tags populares y todos los tags
+  - Tags en minúsculas y sin duplicados
+- **Sistema de imágenes en instantes**:
+  - Upload de 1-5 imágenes por instante
+  - Integración con Firebase Storage
+  - Validación: solo imágenes, máx 5MB por archivo
+  - Galería responsive en página del instante
+  - Lazy loading para optimizar carga
+  - Preview de imágenes antes de guardar
+  - Eliminación de imágenes individuales
+  - URLs permanentes sin token (formato `?alt=media`)
+
+### Changed 🔄
+- **Formulario de creación**: Rediseñado con nuevos componentes
+  - Sección de preguntas guía dinámica
+  - Input de tags con dropdown de sugerencias
+  - Galería de imágenes con drag & drop
+- **Firestore**: Añadidos campos `tags` e `images` a documentos de instantes
+- **Firebase Storage**: Nuevas reglas de seguridad para `/instantes/{userId}/{allPaths=**}`
+- **Next.js config**: Añadido `firebasestorage.googleapis.com` a `remotePatterns` para imágenes
+
+### Fixed 🐛
+- **Permisos de comentarios**: Error `7 PERMISSION_DENIED` al crear comentarios
+  - Cambiado de `createComment()` (cliente) a `adminDb.collection().add()` (servidor)
+  - El servidor ahora bypass las reglas de seguridad de Firestore
+- **React Hook error**: Función `usePrompt` renombrada a `applyPrompt`
+  - React confunde funciones que empiezan con "use" como Hooks
+- **Display de imágenes**: Error 400 al ver imágenes de Firebase Storage
+  - Cambiado de `getDownloadURL()` (token temporal) a URLs permanentes manuales
+  - Formato: `https://firebasestorage.googleapis.com/v0/b/bucket/o/{path}?alt=media`
+
+### Technical Details 🛠️
+- **Firebase Storage**: Funciones `uploadInstanteImages()`, `deleteInstanteImage()`, `deleteAllInstanteImages()`
+- **Firestore**: Funciones `getAllTags()`, `getInstantesByTag()`, `getPopularTags()`
+- **ImageMetadata interface**: `url`, `path`, `name`, `size`, `type`, `uploadedAt`
+- **URL encoding**: Path segments codificados individualmente para Firebase Storage
+
+### Database Schema 📊
+- `instante.tags`: `string[]` (opcional)
+- `instante.images`: `ImageMetadata[]` (opcional)
+  - `url`: URL permanente de la imagen
+  - `path`: Ruta en Firebase Storage
+  - `name`: Nombre original del archivo
+  - `size`: Tamaño en bytes
+  - `type`: MIME type (ej: "image/jpeg")
+  - `uploadedAt`: Timestamp de subida
+
+### Breaking Changes ⚠️
+None - Todos los campos nuevos son opcionales y compatibles con instantes existentes
+
+### Migration Notes 📝
+- Instantes existentes sin campos `tags` o `images` siguen funcionando normalmente
+- No se requiere migración de datos
+- Los nuevos campos son opcionales en el formulario de creación
+
+### Roadmap 🗺️
+La **Fase 4: Programar publicación** se pospone a v0.8:
+- Scheduler con Vercel Cron
+- Programación de publicación automática
+- Email de notificación cuando se publique
+- Selector de fecha/hora en formulario
+
+---
+
 ## [0.5.2] - 2026-01-28
 
 ### Added 🎉
