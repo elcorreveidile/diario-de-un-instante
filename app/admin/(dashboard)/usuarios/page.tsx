@@ -32,7 +32,12 @@ export default function UsuariosPage() {
       const result = await response.json();
 
       if (response.ok) {
-        setUsuarios(result.users);
+        // Convertir timestamps a Date objects
+        const usersWithDates = result.users.map((u: any) => ({
+          ...u,
+          createdAt: new Date(u.createdAt),
+        }));
+        setUsuarios(usersWithDates);
       } else {
         setMessage(result.error || 'Error al cargar usuarios');
       }

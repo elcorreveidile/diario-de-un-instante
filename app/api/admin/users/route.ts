@@ -46,20 +46,23 @@ export async function GET(request: NextRequest) {
           emailVerified = data.emailVerified || false;
         }
 
+        // Convertir fecha a timestamp para serialización JSON
+        const createdAt = data.createdAt?.toDate?.() || new Date();
+
         return {
           uid: doc.id,
           email: data.email || '',
           displayName: data.displayName || '',
           username: data.username,
           role: data.role || 'user',
-          createdAt: data.createdAt?.toDate?.() || new Date(),
+          createdAt: createdAt.getTime(), // Devolver como timestamp (número)
           emailVerified,
         };
       })
     );
 
     // Ordenar por createdAt descendente
-    users.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    users.sort((a, b) => b.createdAt - a.createdAt);
 
     return NextResponse.json({
       success: true,
