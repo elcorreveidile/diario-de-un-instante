@@ -95,7 +95,7 @@ export default function NuevoInstantePage() {
   };
 
   // Función para usar una pregunta guía como base
-  const usePrompt = (pregunta: string) => {
+  const applyPrompt = (pregunta: string) => {
     setTitulo(pregunta);
     setContent(`## ${pregunta}\n\n`);
   };
@@ -257,7 +257,7 @@ export default function NuevoInstantePage() {
                 <li key={idx} className="flex items-start gap-2">
                   <button
                     type="button"
-                    onClick={() => usePrompt(pregunta)}
+                    onClick={() => applyPrompt(pregunta)}
                     className="flex-shrink-0 w-6 h-6 rounded-full bg-white dark:bg-gray-800 border border-violet-300 dark:border-violet-700 text-violet-600 dark:text-violet-400 text-xs flex items-center justify-center hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors font-medium"
                     title="Usar esta pregunta como base"
                   >
