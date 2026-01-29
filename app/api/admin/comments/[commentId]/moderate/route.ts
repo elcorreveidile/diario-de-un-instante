@@ -41,8 +41,13 @@ export async function POST(
       );
     }
 
-    // Verificar que el usuario es el autor del instante (solo el autor puede moderar)
-    if (instante.userId !== decoded.uid) {
+    // Verificar permisos: admin global o autor del instante
+    const userDoc = await adminDb.collection('users').doc(decoded.uid).get();
+    const userData = userDoc.data();
+    const isAdmin = userData?.role === 'admin';
+    const isInstantAuthor = instante.userId === decoded.uid;
+
+    if (!isAdmin && !isInstantAuthor) {
       return NextResponse.json(
         { error: 'No tienes permiso para moderar comentarios en este instante' },
         { status: 403 }

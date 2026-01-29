@@ -17,6 +17,17 @@ export async function GET(request: NextRequest) {
     const token = authHeader.split('Bearer ')[1];
     const decoded = await adminAuth.verifyIdToken(token);
 
+    // Verificar que es admin
+    const userDoc = await adminDb.collection('users').doc(decoded.uid).get();
+    const userData = userDoc.data();
+
+    if (!userDoc.exists || userData?.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Acceso denegado. Solo administradores pueden ver comentarios pendientes.' },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const instanteId = searchParams.get('instanteId');
 

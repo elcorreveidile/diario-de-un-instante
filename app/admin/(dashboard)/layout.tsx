@@ -66,14 +66,14 @@ export default function AdminLayout({
                 >
                   Estadísticas
                 </Link>
-                <Link
-                  href="/admin/comments"
-                  className="text-gray-600 hover:text-gray-900 text-sm"
-                >
-                  Comentarios
-                </Link>
                 {isAdmin && (
                   <>
+                    <Link
+                      href="/admin/comments"
+                      className="text-gray-600 hover:text-gray-900 text-sm"
+                    >
+                      Comentarios
+                    </Link>
                     <Link
                       href="/admin/newsletters"
                       className="text-gray-600 hover:text-gray-900 text-sm"
@@ -189,15 +189,15 @@ export default function AdminLayout({
               >
                 Estadísticas
               </Link>
-              <Link
-                href="/admin/comments"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
-              >
-                Comentarios
-              </Link>
               {isAdmin && (
                 <>
+                  <Link
+                    href="/admin/comments"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
+                  >
+                    Comentarios
+                  </Link>
                   <Link
                     href="/admin/newsletters"
                     onClick={() => setMobileMenuOpen(false)}
