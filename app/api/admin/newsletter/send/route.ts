@@ -79,16 +79,16 @@ export async function POST(request: NextRequest) {
       subject,
       content,
       sentTo: emails.length,
-      successful: result.successful,
+      sent: result.sent,
       failed: result.failed,
       sentAt: new Date(),
     });
 
     return NextResponse.json({
       success: true,
-      sent: result.successful,
+      sent: result.sent,
       failed: result.failed,
-      total: result.total,
+      total: emails.length,
     });
   } catch (error) {
     console.error('[API] Error enviando newsletter:', error);
