@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 interface Subscriber {
@@ -12,7 +13,8 @@ interface Subscriber {
 }
 
 export default function NewslettersPage() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,8 +25,13 @@ export default function NewslettersPage() {
   const [sendResult, setSendResult] = useState<{ success: boolean; message: string } | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAdmin) {
+      router.push('/admin');
+      return;
+    }
     loadSubscribers();
-  }, []);
+  }, [authLoading, isAdmin]);
 
   const loadSubscribers = async () => {
     if (!user) return;

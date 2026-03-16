@@ -25,15 +25,27 @@ export default function LoginPage() {
       const savedEmail = window.localStorage.getItem('emailForSignIn');
       if (savedEmail) {
         completeMagicLinkSignIn(savedEmail)
-          .then(() => {
-            router.push('/admin');
-          })
+          .then(() => createSessionAndRedirect())
+          .then(() => {})
           .catch((err) => {
             setError(err.message || 'Error al iniciar sesión con magic link');
           });
       }
     }
   }, [completeMagicLinkSignIn, router]);
+
+  const createSessionAndRedirect = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      const idToken = await user.getIdToken();
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      });
+    }
+    router.push('/admin');
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -42,7 +54,7 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
-      router.push('/admin');
+      await createSessionAndRedirect();
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión');
     } finally {
@@ -55,7 +67,7 @@ export default function LoginPage() {
     setOauthLoading('google');
     try {
       await signInWithGoogle();
-      router.push('/admin');
+      await createSessionAndRedirect();
     } catch (err: any) {
       if (err.message === 'NEW_USER_NO_INVITE') {
         setError('Esta cuenta de Google no está registrada. Por favor regístrate con un código de invitación.');
@@ -72,7 +84,7 @@ export default function LoginPage() {
     setOauthLoading('apple');
     try {
       await signInWithApple();
-      router.push('/admin');
+      await createSessionAndRedirect();
     } catch (err: any) {
       if (err.message === 'NEW_USER_NO_INVITE') {
         setError('Esta cuenta de Apple no está registrada. Por favor regístrate con un código de invitación.');

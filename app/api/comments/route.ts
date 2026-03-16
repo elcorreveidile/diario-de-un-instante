@@ -29,6 +29,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (content.trim().length > 1000) {
+      return NextResponse.json(
+        { error: 'El comentario no puede superar los 1000 caracteres' },
+        { status: 400 }
+      );
+    }
+
     // Verificar que el instante existe y es público
     const instante = await getInstanteById(instanteId);
     if (!instante) {
@@ -53,6 +60,9 @@ export async function POST(request: NextRequest) {
     const userName = userData?.displayName || userData?.email?.split('@')[0] || 'Usuario';
     const userPhoto = userData?.photoURL;
 
+    // Admin auto-aprobado, resto va a moderación
+    const isAdmin = userData?.role === 'admin';
+
     // Crear comentario usando adminDb (bypass reglas de seguridad)
     const commentRef = await adminDb.collection('comments').add({
       instanteId,
@@ -61,7 +71,7 @@ export async function POST(request: NextRequest) {
       userPhoto,
       content: content.trim(),
       parentId: parentId || null,
-      status: 'approved',
+      status: isAdmin ? 'approved' : 'pending',
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -120,7 +130,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       commentId,
-      message: 'Comentario creado exitosamente',
+      status: isAdmin ? 'approved' : 'pending',
+      message: isAdmin ? 'Comentario publicado' : 'Comentario enviado — aparecerá tras ser aprobado',
     });
   } catch (error) {
     console.error('[API Comments] Error:', error);

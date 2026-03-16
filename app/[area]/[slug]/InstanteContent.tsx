@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getAllInstantes, getInstantesByUser, Instante, toggleLike, ImageMetadata } from '@/lib/firestore';
+import { getInstanteBySlug, getInstanteBySlugAndUser, Instante, toggleLike, ImageMetadata } from '@/lib/firestore';
 import { useAuth } from '@/lib/auth';
 import { remark } from 'remark';
-import html from 'remark-html';
+import remarkRehype from 'remark-rehype';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeStringify from 'rehype-stringify';
 import { useHotkeys } from 'react-hotkeys-hook';
 import CommentList from '@/components/comments/CommentList';
 
@@ -56,8 +58,6 @@ export default function InstanteContent({ areaId, slug }: InstanteContentProps) 
     }
   };
 
-  console.log('[InstantePage] Render - User:', user?.uid, 'loading:', loading, 'instante:', instante?.titulo);
-
   useEffect(() => {
     let cancelled = false;
 
@@ -71,62 +71,48 @@ export default function InstanteContent({ areaId, slug }: InstanteContentProps) 
       try {
         let allInstantes: Instante[];
 
-        console.log('[InstantePage] Cargando - User:', user?.uid, 'Buscando:', areaId, slug);
+        // Buscar directamente por área y slug — query eficiente
+        let found: Instante | null = null;
 
-        // Si hay usuario logueado, obtener sus instantes (incluyendo privados)
         if (user?.uid) {
-          const userInstantes = await getInstantesByUser(user.uid);
-          console.log('[InstantePage] Instantes del usuario:', userInstantes.length);
-          // Obtener también los instantes públicos de otros usuarios
-          const publicInstantes = await getAllInstantes();
-          // Combinar sin duplicados
-          allInstantes = [...userInstantes, ...publicInstantes.filter(i => !userInstantes.find(ui => ui.id === i.id))];
+          // Usuario logueado: primero busca entre sus instantes (incluye privados)
+          found = await getInstanteBySlugAndUser(areaId, slug, user.uid);
+          // Si no es suyo, busca entre los públicos
+          if (!found) {
+            const publicInstante = await getInstanteBySlug(areaId, slug);
+            if (publicInstante) {
+              const esPublico = publicInstante.privado === false || !Object.prototype.hasOwnProperty.call(publicInstante, 'privado');
+              const esVisible = publicInstante.estado === 'publicado' || !Object.prototype.hasOwnProperty.call(publicInstante, 'estado');
+              if (esPublico && esVisible) found = publicInstante;
+            }
+          }
         } else {
-          // Si no hay usuario logueado, solo obtener instantes públicos
-          allInstantes = await getAllInstantes();
+          // Sin sesión: solo instantes públicos y publicados
+          const publicInstante = await getInstanteBySlug(areaId, slug);
+          if (publicInstante) {
+            const esPublico = publicInstante.privado === false || !Object.prototype.hasOwnProperty.call(publicInstante, 'privado');
+            const esVisible = publicInstante.estado === 'publicado' || !Object.prototype.hasOwnProperty.call(publicInstante, 'estado');
+            if (esPublico && esVisible) found = publicInstante;
+          }
         }
-
-        console.log('[InstantePage] Total instantes:', allInstantes.length);
-
-        // Buscar el instante
-        const found = allInstantes.find(i => {
-          const matchArea = i.area === areaId;
-          const matchSlug = i.slug === slug;
-          const esPublico = i.privado === false || !i.hasOwnProperty('privado');
-          const esVisible = i.estado === 'publicado' || !i.hasOwnProperty('estado');
-          const esDelUsuario = user?.uid && i.userId === user.uid;
-
-          console.log('[InstantePage] Checking', i.slug, {
-            matchArea,
-            matchSlug,
-            esPublico,
-            esVisible,
-            esDelUsuario,
-            userId: i.userId,
-            privado: i.privado,
-          });
-
-          return matchArea && matchSlug && (esPublico || esDelUsuario) && esVisible;
-        });
 
         if (cancelled) return;
 
         if (!found) {
-          console.log('[InstantePage] No encontrado');
           setIsNotFound(true);
           setLoading(false);
           return;
         }
-
-        console.log('[InstantePage] Encontrado:', found.titulo);
         setInstante(found);
         setLikeCount(found.likeCount || 0);
         setIsLiked(user?.uid && found.likes ? found.likes.includes(user.uid) : false);
 
-        // Convertir Markdown a HTML
+        // Convertir Markdown a HTML con sanitización contra XSS
         const processedContent = await remark()
-          .use(html)
-          .process(found.content) as any;
+          .use(remarkRehype)
+          .use(rehypeSanitize)
+          .use(rehypeStringify)
+          .process(found.content);
         let htmlContent = processedContent.toString();
         htmlContent = htmlContent.replace(/<a href=/g, '<a target="_blank" rel="noopener" href=');
         setContentHtml(htmlContent);

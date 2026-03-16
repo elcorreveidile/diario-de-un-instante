@@ -315,6 +315,28 @@ export async function getInstanteBySlug(areaId: string, slug: string): Promise<I
   } as Instante;
 }
 
+// Obtener el instante de un usuario específico por área y slug (incluye privados)
+export async function getInstanteBySlugAndUser(areaId: string, slug: string, userId: string): Promise<Instante | null> {
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where('area', '==', areaId),
+    where('slug', '==', slug),
+    where('userId', '==', userId)
+  );
+
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const doc = snapshot.docs[0];
+  return {
+    id: doc.id,
+    ...doc.data(),
+  } as Instante;
+}
+
 // ==================== NUEVAS FUNCIONES V0.2 ====================
 
 // Obtener solo instantes públicos y publicados

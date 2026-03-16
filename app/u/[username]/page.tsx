@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { headers } from 'next/headers';
 import Link from 'next/link';
+import Image from 'next/image';
 import InstanteCard from '@/components/InstanteCard';
 
 export const dynamic = 'force-dynamic';
@@ -92,10 +93,12 @@ export default async function UserProfilePage({ params }: PageProps) {
         {/* Foto de cabecera */}
         {user.headerPhotoURL ? (
           <div className="w-full h-48 sm:h-64 relative">
-            <img
+            <Image
               src={user.headerPhotoURL}
               alt="Cabecera"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              priority
             />
             <div className="absolute inset-0 bg-black/20"></div>
           </div>
@@ -111,9 +114,11 @@ export default async function UserProfilePage({ params }: PageProps) {
           <div className="relative -mt-16 sm:-mt-20 mb-6 flex items-end gap-6">
             {/* Avatar */}
             {user.photoURL ? (
-              <img
+              <Image
                 src={user.photoURL}
                 alt={user.displayName}
+                width={160}
+                height={160}
                 className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-white shadow-xl"
               />
             ) : (

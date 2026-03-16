@@ -94,6 +94,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
           console.error('Error loading user profile:', error);
         }
+
+        // Crear cookie de sesión para protección server-side
+        try {
+          const idToken = await user.getIdToken();
+          await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken }),
+          });
+        } catch (error) {
+          console.error('Error creando sesión:', error);
+        }
       } else {
         setUserProfile(null);
       }
@@ -334,6 +346,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    await fetch('/api/auth/session', { method: 'DELETE' }).catch(() => {});
     await signOut(auth);
   };
 
