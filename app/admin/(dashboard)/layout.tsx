@@ -15,12 +15,13 @@ export default function AdminLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
+    // loading === false (not undefined) means auth state has been determined
+    if (loading === false && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
 
-  if (loading) {
+  if (loading || loading === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
